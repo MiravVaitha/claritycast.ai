@@ -1,33 +1,56 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { ClarifyInputSchema, ClarifyOutputSchema } from "@/lib/schemas";
-import { clarifyPrompt, CLARIFY_SYSTEM_PROMPT } from "@/lib/prompts";
-import { generateText } from "@/lib/geminiClient";
+import { generateStructuredData } from "@/lib/geminiClient";
+import { buildClarityPrompt, CLARIFY_SYSTEM_PROMPT } from "@/lib/prompts";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const validatedInput = ClarifyInputSchema.parse(body);
 
-        const prompt = clarifyPrompt(validatedInput.mode, validatedInput.text);
-
-        let result;
-        try {
-            result = await generateText(prompt, CLARIFY_SYSTEM_PROMPT);
-            ClarifyOutputSchema.parse(result);
-        } catch (err: any) {
-            console.warn("First Gemini attempt failed or invalid, retrying...", err.message);
-
-            // Retry once with correction prompt
-            const correctionPrompt = `${prompt}\n\nIMPORTANT: Your previous output was invalid. Ensure the output strictly follows the JSON schema and provides all required fields accurately. Error: ${err.message}. RETURN ONLY VALID JSON.`;
-            result = await generateText(correctionPrompt, CLARIFY_SYSTEM_PROMPT);
-            ClarifyOutputSchema.parse(result);
+        // Validate Input
+        const parseResult = ClarifyInputSchema.safeParse(body);
+        if (!parseResult.success) {
+            // Check if mode is invalid
+            const modeError = parseResult.error.errors.find(e => e.path[0] === 'mode');
+            if (modeError) {
+                return NextResponse.json(
+                    { error: "Invalid mode. Expected one of: decision, plan, overwhelm, message_prep." },
+                    { status: 400 }
+                );
+            }
+            return NextResponse.json(
+                { error: "Invalid input", details: parseResult.error.errors },
+                { status: 400 }
+            );
         }
 
-        return NextResponse.json(result);
+        const { mode, text, followup_answer } = parseResult.data;
+
+        const userPrompt = buildClarityPrompt(mode, text, followup_answer);
+
+        const output = await generateStructuredData(
+            CLARIFY_SYSTEM_PROMPT,
+            userPrompt,
+            ClarifyOutputSchema,
+            "Clarity Assessment"
+        );
+
+        // Ensure arrays are initialized even if LLM returns partials (Validation usually catches this, but for extra safety logic)
+        const safeOutput = {
+            ...output,
+            hidden_assumptions: output.hidden_assumptions ?? [],
+            tradeoffs: output.tradeoffs ?? [],
+            decision_levers: output.decision_levers ?? [],
+            options: output.options ?? [],
+            next_steps_14_days: output.next_steps_14_days ?? [],
+        };
+
+        return NextResponse.json(safeOutput);
+
     } catch (error: any) {
-        console.error("API Error in /api/clarify:", error);
+        console.error("Clarity API Error:", error);
         return NextResponse.json(
-            { error: error?.message || "Failed to process clarity request." },
+            { error: error.message || "Failed to generate clarity assessment" },
             { status: 500 }
         );
     }

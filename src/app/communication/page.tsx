@@ -1,18 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CommunicateOutput } from "@/lib/types";
+import { useEffect, useState, useRef } from "react";
+import { CommunicateOutput } from "@/lib/schemas";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import DraftCard from "@/components/DraftCard";
 
 export default function CommunicationPage() {
     const [inputText, setInputText] = useLocalStorage<string>("communication_input", "");
 
-    // Renaming 'audience' to 'context' as per requirements
     type ContextType = "evaluative" | "technical" | "persuasive" | "personal";
     const [contexts, setContexts] = useLocalStorage<ContextType[]>("communication_contexts", []);
 
-    const [intent, setIntent] = useLocalStorage<string>("communication_intent", "Inform");
+    const [intent, setIntent] = useLocalStorage<string>("communication_intent", "inform");
     const [options, setOptions] = useLocalStorage("communication_options", {
         preserveMeaning: true,
         concise: false,
@@ -24,7 +23,9 @@ export default function CommunicationPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Hydration fix for localStorage
+    const resultsRef = useRef<HTMLDivElement>(null);
+
+    // Hydration fix
     const [isClient, setIsClient] = useState(false);
     useEffect(() => setIsClient(true), []);
 
@@ -50,21 +51,12 @@ export default function CommunicationPage() {
         setIsLoading(true);
         setError(null);
         try {
-            // Mocking clarity data structure for the communication API since we are bypassing the clarity step
-            // The API expects `clarity` object. We will just pass the input text as the summary.
-            const mockClarity = {
-                summary: inputText,
-                priorities: [],
-                risks: [],
-                key_question: ""
-            };
-
             const response = await fetch("/api/communicate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    clarity: mockClarity,
-                    audiences: contexts, // Mapping contexts to audiences for the backend
+                    message: inputText,
+                    contexts,
                     intent: intent.toLowerCase(),
                     options,
                 }),
@@ -84,6 +76,11 @@ export default function CommunicationPage() {
 
             const data = await response.json();
             setDraftsData(data);
+
+            setTimeout(() => {
+                resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -97,6 +94,12 @@ export default function CommunicationPage() {
             setDraftsData(null);
         }
     };
+
+    const fillExample = () => {
+        setInputText("I need to tell my boss that the project is delayed by 2 weeks because the backend team changed the API without telling us.");
+        setContexts(["evaluative", "technical"]);
+        setIntent("inform");
+    }
 
     if (!isClient) {
         return (
@@ -116,12 +119,20 @@ export default function CommunicationPage() {
                     </h1>
                     <p className="text-slate-500 mt-2">Tailor your message for the right audience and intent.</p>
                 </div>
-                <button
-                    onClick={clearSession}
-                    className="text-sm font-medium text-slate-400 hover:text-red-500 transition-colors"
-                >
-                    Clear session
-                </button>
+                <div className="flex gap-4">
+                    <button
+                        onClick={fillExample}
+                        className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                    >
+                        Use Example
+                    </button>
+                    <button
+                        onClick={clearSession}
+                        className="text-sm font-medium text-slate-400 hover:text-red-500 transition-colors"
+                    >
+                        Clear session
+                    </button>
+                </div>
             </header>
 
             {error && (
@@ -149,9 +160,9 @@ export default function CommunicationPage() {
                         <label className="text-sm font-semibold uppercase tracking-wider text-slate-500">Context</label>
                         <div className="grid grid-cols-2 gap-2">
                             {[
-                                { id: "evaluative", label: "Evaluative", sub: "Recruiter/Interviewer" },
+                                { id: "evaluative", label: "Evaluative", sub: "Recruiter/Boss" },
                                 { id: "technical", label: "Technical", sub: "Engineer/Teammate" },
-                                { id: "persuasive", label: "Persuasive", sub: "Customer/Stakeholder" },
+                                { id: "persuasive", label: "Persuasive", sub: "Customer/Invest." },
                                 { id: "personal", label: "Personal", sub: "Friend/Network" },
                             ].map((c) => (
                                 <button
@@ -176,8 +187,8 @@ export default function CommunicationPage() {
                             onChange={(e) => setIntent(e.target.value)}
                             className="w-full p-3 bg-white border border-slate-200 rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-indigo-600"
                         >
-                            {["Inform", "Persuade", "Explain", "Apologise"].map((i) => (
-                                <option key={i} value={i}>{i}</option>
+                            {["inform", "persuade", "explain", "apologise"].map((i) => (
+                                <option key={i} value={i} className="capitalize">{i}</option>
                             ))}
                         </select>
 
@@ -202,15 +213,18 @@ export default function CommunicationPage() {
 
                     <button
                         onClick={handleGenerate}
-                        disabled={isLoading}
+                        disabled={isLoading || contexts.length === 0}
                         className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
                     >
-                        {isLoading && <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
-                        Generate Drafts
+                        {isLoading ? (
+                            <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : (
+                            draftsData ? "Regenerate Drafts" : "Generate Drafts"
+                        )}
                     </button>
                 </section>
 
-                <section className="lg:col-span-8 space-y-6">
+                <section className="lg:col-span-8 space-y-6" ref={resultsRef}>
                     <div className="flex items-center gap-2 mb-2">
                         <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
                         <label className="text-sm font-semibold uppercase tracking-wider text-slate-500">Drafts</label>

@@ -1,37 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { CommunicateInputSchema, CommunicateOutputSchema } from "@/lib/schemas";
-import { communicatePrompt, COMMUNICATE_SYSTEM_PROMPT } from "@/lib/prompts";
-import { generateText } from "@/lib/geminiClient";
+import { generateStructuredData } from "@/lib/geminiClient";
+import { buildCommunicatePrompt, COMMUNICATE_SYSTEM_PROMPT } from "@/lib/prompts";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const validatedInput = CommunicateInputSchema.parse(body);
 
-        const prompt = communicatePrompt(
-            validatedInput.clarity,
-            validatedInput.audiences,
-            validatedInput.intent,
-            validatedInput.options
-        );
-
-        let result;
-        try {
-            result = await generateText(prompt, COMMUNICATE_SYSTEM_PROMPT);
-            CommunicateOutputSchema.parse(result);
-        } catch (err: any) {
-            console.warn("First Gemini attempt for /api/communicate failed, retrying...", err.message);
-
-            const correctionPrompt = `${prompt}\n\nIMPORTANT: Your previous output was invalid. Ensure the output strictly follows the JSON schema (an object with a "drafts" array). Error: ${err.message}. RETURN ONLY VALID JSON.`;
-            result = await generateText(correctionPrompt, COMMUNICATE_SYSTEM_PROMPT);
-            CommunicateOutputSchema.parse(result);
+        // Validate Input
+        const parseResult = CommunicateInputSchema.safeParse(body);
+        if (!parseResult.success) {
+            return NextResponse.json(
+                { error: "Invalid input", details: parseResult.error.errors },
+                { status: 400 }
+            );
         }
 
-        return NextResponse.json(result);
+        const { message, contexts, intent, options } = parseResult.data;
+
+        const userPrompt = buildCommunicatePrompt(message, contexts, intent, options);
+
+        const output = await generateStructuredData(
+            COMMUNICATE_SYSTEM_PROMPT,
+            userPrompt,
+            CommunicateOutputSchema,
+            "Communication Drafts"
+        );
+
+        return NextResponse.json(output);
+
     } catch (error: any) {
-        console.error("API Error in /api/communicate:", error);
+        console.error("Communication API Error:", error);
         return NextResponse.json(
-            { error: error?.message || "Failed to process communication request." },
+            { error: error.message || "Failed to generate drafts" },
             { status: 500 }
         );
     }

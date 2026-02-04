@@ -1,27 +1,35 @@
 import { z } from "zod";
 
-export const ClarityModeSchema = z.enum(["decision", "plan", "brain_dump", "message_prep"]);
+export const ClarityModeSchema = z.enum(["decision", "plan", "overwhelm", "message_prep"]);
+// Note: "brain_dump" mapped to "overwhelm" or kept if needed. The prompt asked for specific types.
+// The user request specified: "problem_type": "decision" | "plan" | "overwhelm" | "message_prep"
+// I will align the ClarityMode to valid problem types or map them.
+// Let's allow the UI mode to map to these. 
 
 export const ClarifyInputSchema = z.object({
     mode: ClarityModeSchema,
     text: z.string().min(1, "Input text is required"),
+    followup_answer: z.string().optional(),
 });
 
 export const ClarifyOutputSchema = z.object({
-    summary: z.string(),
-    priorities: z.array(z.string()),
-    assumptions: z.array(z.string()),
-    risks: z.array(z.object({
-        risk: z.string(),
-        likelihood: z.enum(["low", "med", "high"]),
+    problem_type: z.enum(["decision", "plan", "overwhelm", "message_prep"]),
+    core_issue: z.string(),
+    hidden_assumptions: z.array(z.string()),
+    tradeoffs: z.array(z.string()),
+    decision_levers: z.array(z.string()),
+    options: z.array(z.object({
+        option: z.string(),
+        why: z.string(),
+        when_it_wins: z.string()
     })),
-    next_actions: z.array(z.string()),
-    key_question: z.string(),
+    next_steps_14_days: z.array(z.string()),
+    one_sharp_question: z.string(),
 });
 
 export const CommunicateInputSchema = z.object({
-    clarity: ClarifyOutputSchema,
-    audiences: z.array(z.enum(["recruiter", "engineer", "customer", "friend"])),
+    message: z.string().min(1),
+    contexts: z.array(z.enum(["evaluative", "technical", "persuasive", "personal"])),
     intent: z.enum(["inform", "persuade", "explain", "apologise"]),
     options: z.object({
         preserveMeaning: z.boolean(),
@@ -32,7 +40,7 @@ export const CommunicateInputSchema = z.object({
 
 export const CommunicateOutputSchema = z.object({
     drafts: z.array(z.object({
-        audience: z.enum(["recruiter", "engineer", "customer", "friend"]),
+        context: z.enum(["evaluative", "technical", "persuasive", "personal"]),
         intent: z.enum(["inform", "persuade", "explain", "apologise"]),
         draft: z.string(),
         key_changes: z.array(z.string()),
@@ -40,7 +48,7 @@ export const CommunicateOutputSchema = z.object({
     })),
 });
 
-export type ClarityMode = z.infer<typeof ClarityModeSchema>;
+export type ClarityMode = z.infer<typeof ClarifyInputSchema>["mode"];
 export type ClarifyInput = z.infer<typeof ClarifyInputSchema>;
 export type ClarifyOutput = z.infer<typeof ClarifyOutputSchema>;
 export type CommunicateInput = z.infer<typeof CommunicateInputSchema>;
