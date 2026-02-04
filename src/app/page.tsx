@@ -40,8 +40,16 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Failed to generate clarity cards");
+        // Try to parse error as JSON first, fallback to text if it's HTML or other
+        let errorMessage = "Failed to generate clarity cards";
+        try {
+          const errData = await response.json();
+          errorMessage = errData.error || errorMessage;
+        } catch {
+          const textError = await response.text();
+          errorMessage = textError.substring(0, 100) || "Internal Server Error";
+        }
+        throw new Error(`${response.status} – ${errorMessage}`);
       }
 
       const data = await response.json();
@@ -78,8 +86,16 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Failed to generate drafts");
+        // Try to parse error as JSON first, fallback to text if it's HTML or other
+        let errorMessage = "Failed to generate drafts";
+        try {
+          const errData = await response.json();
+          errorMessage = errData.error || errorMessage;
+        } catch {
+          const textError = await response.text();
+          errorMessage = textError.substring(0, 100) || "Internal Server Error";
+        }
+        throw new Error(`${response.status} – ${errorMessage}`);
       }
 
       const data = await response.json();
@@ -190,8 +206,8 @@ export default function Home() {
                     key={a}
                     onClick={() => toggleAudience(a)}
                     className={`px-4 py-1.5 rounded-full border text-sm font-medium transition-all ${audience.includes(a.toLowerCase())
-                        ? "bg-slate-900 border-slate-900 text-white"
-                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-400"
+                      ? "bg-slate-900 border-slate-900 text-white"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-400"
                       }`}
                   >
                     {a}

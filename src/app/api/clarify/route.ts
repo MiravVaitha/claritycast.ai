@@ -1,45 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ClarifyInputSchema, ClarifyOutputSchema, ClarifyOutput } from "@/lib/schemas";
+import { ClarifyInputSchema, ClarifyOutputSchema } from "@/lib/schemas";
+import { clarifyPrompt, CLARIFY_SYSTEM_PROMPT } from "@/lib/prompts";
+import { generateText } from "@/lib/geminiClient";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const validatedInput = ClarifyInputSchema.parse(body);
 
-        // Mock logic based on input mode and text
-        const mockOutput: ClarifyOutput = {
-            summary: `Clarity assessment for your ${validatedInput.mode.replace("_", " ")}: "${validatedInput.text.substring(0, 50)}${validatedInput.text.length > 50 ? '...' : ''}"`,
-            priorities: [
-                "Synthesize complex terminology",
-                "Identify core decision criteria",
-                "Streamline the communication flow"
-            ],
-            assumptions: [
-                "The audience has basic technical knowledge",
-                "The timeline is flexible but needs definition",
-                "Budget is not the primary constraint for this phase"
-            ],
-            risks: [
-                { risk: "Misalignment on key objectives", likelihood: "low" },
-                { risk: "Data privacy requirements not fully defined", likelihood: "med" },
-                { risk: "Resource availability for immediate implementation", likelihood: "high" }
-            ],
-            next_actions: [
-                "Draft a high-level project roadmap",
-                "Schedule a stakeholder alignment meeting",
-                "Finalize the technical requirements document"
-            ],
-            key_question: "What is the single most important outcome you need from this communication?"
-        };
+        const prompt = clarifyPrompt(validatedInput.mode, validatedInput.text);
 
-        // Validate output with Zod before returning
-        const validatedOutput = ClarifyOutputSchema.parse(mockOutput);
+        let result;
+        try {
+            result = await generateText(prompt, CLARIFY_SYSTEM_PROMPT);
+            ClarifyOutputSchema.parse(result);
+        } catch (err: any) {
+            console.warn("First Gemini attempt failed or invalid, retrying...", err.message);
 
-        return NextResponse.json(validatedOutput);
+            // Retry once with correction prompt
+            const correctionPrompt = `${prompt}\n\nIMPORTANT: Your previous output was invalid. Ensure the output strictly follows the JSON schema and provides all required fields accurately. Error: ${err.message}. RETURN ONLY VALID JSON.`;
+            result = await generateText(correctionPrompt, CLARIFY_SYSTEM_PROMPT);
+            ClarifyOutputSchema.parse(result);
+        }
+
+        return NextResponse.json(result);
     } catch (error: any) {
+        console.error("API Error in /api/clarify:", error);
         return NextResponse.json(
-            { error: error?.message || "Invalid request" },
-            { status: 400 }
+            { error: error?.message || "Failed to process clarity request." },
+            { status: 500 }
         );
     }
 }
