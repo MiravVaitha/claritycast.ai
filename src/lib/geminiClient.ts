@@ -1,20 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 
-const DEFAULT_MODEL = "gemini-2.0-flash"; // Updated to a more robust model if available, or stick to what works. 
-// User mentioned: "Keep Gemini usage as-is (already working), but ensure you pass the selected model and do not regress to v1beta."
-// I will stick to what was there or a safe default. The previous file had "gemini-3-flash-preview".
-// The prompt said "Keep Gemini usage as-is". I will check the previous file content again to be sure.
-// Wait, I replaced the file content. I should have checked.
-// Previous content had: const DEFAULT_MODEL = "gemini-3-flash-preview";
-// I will restore that.
-
 const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.0-flash-exp";
-// Note: "gemini-3-flash-preview" might have been a placeholder or specific to the user's env. 
-// I will use a reliable model name. The user said "legacy API endpoints" were 404ing in history.
-// User said "Keep Gemini usage as-is". 
-// I will assume the previous code was working.
-// Let's use a standard meaningful default but allow Env override.
+const DEBUG_AI = process.env.DEBUG_AI === "true";
 
 export function getGenAI() {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -24,11 +12,98 @@ export function getGenAI() {
     return new GoogleGenAI({ apiKey });
 }
 
+/**
+ * Check if error is a rate limit error
+ */
+export function isRateLimitError(error: any): boolean {
+    if (!error) return false;
+
+    const message = error.message || '';
+    const status = error.status || error.statusCode || 0;
+
+    // Check for HTTP 429 or RESOURCE_EXHAUSTED message
+    return status === 429 ||
+        message.includes('RESOURCE_EXHAUSTED') ||
+        message.includes('rate limit') ||
+        message.includes('quota');
+}
+
+/**
+ * Extract retry delay from error response
+ */
+export function extractRetryDelay(error: any): number | null {
+    if (!error) return null;
+
+    // Try to find retry delay in various formats
+    if (error.retryDelay) return error.retryDelay;
+    if (error.retryInfo?.retryDelay) return error.retryInfo.retryDelay;
+
+    // Parse from message like "Please retry in 60s"
+    const message = error.message || '';
+    const match = message.match(/retry in (\d+)\s*s/i);
+    if (match) {
+        return parseInt(match[1], 10);
+    }
+
+    // Default to 60 seconds if no specific delay found
+    return 60;
+}
+
+/**
+ * Extract JSON from text that might contain markdown code blocks or extra text
+ */
+function extractJSON(text: string): any {
+    // First try direct parse
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        // Try to extract JSON from markdown code blocks
+        const codeBlockMatch = text.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+        if (codeBlockMatch) {
+            try {
+                return JSON.parse(codeBlockMatch[1]);
+            } catch (e2) {
+                // Continue to brace matching
+            }
+        }
+
+        // Try to find first complete JSON object using brace matching
+        let braceCount = 0;
+        let startIdx = -1;
+        let endIdx = -1;
+
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === '{') {
+                if (braceCount === 0) startIdx = i;
+                braceCount++;
+            } else if (text[i] === '}') {
+                braceCount--;
+                if (braceCount === 0 && startIdx !== -1) {
+                    endIdx = i;
+                    break;
+                }
+            }
+        }
+
+        if (startIdx !== -1 && endIdx !== -1) {
+            const jsonStr = text.substring(startIdx, endIdx + 1);
+            try {
+                return JSON.parse(jsonStr);
+            } catch (e3) {
+                throw new Error("Could not extract valid JSON from response");
+            }
+        }
+
+        throw new Error("No valid JSON found in response");
+    }
+}
+
 export async function generateStructuredData<T>(
     systemPrompt: string,
     userPrompt: string,
     schema: z.ZodType<T>,
-    schemaName: string = "Data"
+    schemaName: string = "Data",
+    repairPromptFn?: (error: string, originalPrompt: string) => string
 ): Promise<T> {
     const ai = getGenAI();
     const model = MODEL_NAME;
@@ -36,38 +111,61 @@ export async function generateStructuredData<T>(
     // First attempt
     try {
         const result = await executeGeneration(ai, model, userPrompt, systemPrompt);
-        return validateAndParse(result, schema);
+        return validateAndParse(result, schema, schemaName);
     } catch (error: any) {
-        console.warn(`First attempt failed for ${schemaName}:`, error.message);
+        if (DEBUG_AI) {
+            console.log(`\n[DEBUG_AI] First attempt failed for ${schemaName}`);
+            console.log(`Error: ${error.message}`);
+        }
 
-        // Retry logic
+        // Retry logic with custom repair prompt if provided
         try {
-            const retryPrompt = `Previous attempt to generate JSON failed validation.
+            const retryPrompt = repairPromptFn
+                ? repairPromptFn(error.message, userPrompt)
+                : `Previous attempt to generate JSON failed validation.
 Error: ${error.message}
 
-Please fix the JSON to match the schema exactly.
+Rewrite ONLY the JSON to match schema exactly. No extra keys. No markdown.
 ${userPrompt}`;
+
+            if (DEBUG_AI) {
+                console.log(`\n[DEBUG_AI] Retrying with repair prompt...`);
+            }
+
             const result = await executeGeneration(ai, model, retryPrompt, systemPrompt);
-            return validateAndParse(result, schema);
+            return validateAndParse(result, schema, schemaName);
         } catch (retryError: any) {
-            console.error(`Retry failed for ${schemaName}:`, retryError.message);
-            throw new Error(`Failed to generate valid ${schemaName} after retry.`);
+            if (DEBUG_AI) {
+                console.error(`\n[DEBUG_AI] Retry failed for ${schemaName}`);
+                console.error(`Error: ${retryError.message}`);
+            }
+            throw retryError; // Throw the detailed error, not a generic message
         }
     }
 }
 
-function validateAndParse<T>(json: any, schema: z.ZodType<T>): T {
+function validateAndParse<T>(json: any, schema: z.ZodType<T>, schemaName: string): T {
     const parseResult = schema.safeParse(json);
     if (!parseResult.success) {
-        const errorMsg = parseResult.error.errors.map(e => `${e.path.join(".")}: ${e.message}`).join(", ");
-        throw new Error(`Schema validation failed: ${errorMsg}`);
+        const errorMsg = parseResult.error.issues.map(e => `${e.path.join(".")}: ${e.message}`).join(", ");
+
+        if (DEBUG_AI) {
+            console.log(`\n[DEBUG_AI] Schema validation failed for ${schemaName}`);
+            console.log(`Raw response (first 2000 chars):`, JSON.stringify(json).substring(0, 2000));
+            console.log(`Zod errors:`, parseResult.error.issues);
+        }
+
+        // Create detailed error with issues attached
+        const error: any = new Error(`Schema validation failed: ${errorMsg}`);
+        error.zodIssues = parseResult.error.issues;
+        error.rawData = json;
+        throw error;
     }
     return parseResult.data;
 }
 
 async function executeGeneration(ai: GoogleGenAI, model: string, prompt: string, systemPrompt: string) {
-    // Add explicit JSON instruction if not present
-    const finalSystemPrompt = `${systemPrompt}\n\nIMPORTANT: Output strictly valid JSON.`;
+    const finalSystemPrompt = `${systemPrompt}\n\nCRITICAL: Output ONLY valid JSON. Do NOT wrap in markdown code blocks. Do NOT add any commentary.`;
 
     try {
         const response: any = await ai.models.generateContent({
@@ -86,15 +184,19 @@ async function executeGeneration(ai: GoogleGenAI, model: string, prompt: string,
         }
 
         try {
-            return JSON.parse(text);
+            return extractJSON(text);
         } catch (e) {
+            if (DEBUG_AI) {
+                console.log(`\n[DEBUG_AI] JSON extraction failed`);
+                console.log(`Raw text (first 2000 chars):`, text.substring(0, 2000));
+            }
             throw new Error("Invalid JSON returned by Gemini");
         }
     } catch (error: any) {
-        // Handle 404 or other API errors
         if (error.message?.includes("404") || error.message?.includes("not found")) {
-            // Fallback logic if needed, or just rethrow
-            // For now, rethrow to let the caller handle or fail
+            if (DEBUG_AI) {
+                console.error(`\n[DEBUG_AI] Model not found: ${model}`);
+            }
         }
         throw error;
     }

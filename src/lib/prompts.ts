@@ -1,107 +1,171 @@
 import { ClarityMode } from "./schemas";
 
 export const CLARIFY_SYSTEM_PROMPT = `You are an AI assistant specialized in strategic intervention and clarity.
-Your goal is to provide "intervention clarity" - identifying the core issue, hidden assumptions, and actionable next steps.
+Your goal is to provide "intervention clarity" - identifying the core issue and actionable next steps depending on the mode.
 Constraints:
-- Do Not mirror the user's phrasing.
+- Do NOT mirror the user's phrasing.
 - Be neutral; no therapy tone; no motivational fluff.
 - Each field must add NEW information or structure.
-- The "next_steps_14_days" must be low-risk experiments or concrete actions.
-- Output MUST be valid JSON matching the requested schema.`;
+- Output MUST be valid JSON matching the requested schema.
+- Do NOT wrap JSON in markdown code blocks.`;
 
 export function buildClarityPrompt(mode: ClarityMode, text: string, followup_answer?: string) {
-    let modeInstructions = "";
+  let modeInstructions = "";
+  let outputExample = "";
 
-    switch (mode) {
-        case "decision":
-            modeInstructions = `Focus on comparing options and reducing uncertainty.
-- core_issue: What is the actual choice vs the distraction?
-- decision_levers: What variable matters most (e.g., "Time" vs "Cost")?
-- options: Distinct, viable paths.
-- next_steps: Experiments to gather missing info.`;
-            break;
-        case "plan":
-            modeInstructions = `Focus on execution and sequencing.
-- core_issue: What is the bottleneck?
-- hidden_assumptions: What are we assuming will go right?
-- next_steps: Chronological, concrete actions.`;
-            break;
-        case "overwhelm":
-            modeInstructions = `PRODUCE CALMING, SIMPLIFIED OUTPUT TO REDUCE COGNITIVE LOAD.
-- problem_type: "overwhelm"
+  switch (mode) {
+    case "decision":
+      modeInstructions = `Mode: DECISION (Focus on options, levers, and reducing uncertainty)
+- core_issue: 1-2 sentences. What is the actual choice vs the distraction?
+- options: 2-3 Distinct, viable paths. For each include { option, why, when_it_wins }.
+- decision_levers: 1-3 variables/information that would decide this (e.g. "Time" vs "Cost").
+- tradeoffs: 1-3 unavoidable trade-offs.
+- next_steps_14_days: Array with a SINGLE small experiment to reduce uncertainty in <= 7 days.
+- one_sharp_question: A question to cut through the noise.`;
+      outputExample = `{
+  "problem_type": "decision",
+  "core_issue": "string",
+  "options": [{"option": "string", "why": "string", "when_it_wins": "string"}],
+  "decision_levers": ["string"],
+  "tradeoffs": ["string"],
+  "next_steps_14_days": ["single experiment"],
+  "one_sharp_question": "string"
+}`;
+      break;
+
+    case "plan":
+      modeInstructions = `Mode: PLAN (Focus on execution and sequencing)
+- core_issue: Precise goal statement.
+- hidden_assumptions: 3-5 key milestones.
+- next_steps_14_days: 5-10 concrete actions.
+- tradeoffs: 2-4 risks and mitigations.
+- decision_levers: 1-2 success metrics.
+- one_sharp_question: A question to verify the plan's robustness.`;
+      outputExample = `{
+  "problem_type": "plan",
+  "core_issue": "string",
+  "hidden_assumptions": ["milestone1", "milestone2", "milestone3"],
+  "next_steps_14_days": ["action1", "action2", "action3", "action4", "action5"],
+  "tradeoffs": ["risk1", "risk2"],
+  "decision_levers": ["metric1"],
+  "one_sharp_question": "string"
+}`;
+      break;
+
+    case "overwhelm":
+      modeInstructions = `Mode: OVERWHELM (Focus on calming reduction of load)
 - core_issue: 1 clear sentence identifying the root stressor.
-- hidden_assumptions: 2-4 assumptions driving the stress.
-- tradeoffs: 1-2 key things to let go of.
-- decision_levers: 1-2 levers that matter right now.
-- options: MAX 2 simple options (e.g., "Do it now" vs "Defer").
-- next_steps_14_days: PRIORITIZE IMMEDIACY.
-    * Item 1 MUST be a "Next 10 minutes" trivial action.
-    * Item 2 MUST be a "Next 24 hours" action.
-    * 2-4 additional small steps.
-- one_sharp_question: A calming, grounding question.`;
-            break;
-        case "message_prep":
-            modeInstructions = `Focus on the 'Why' and the 'Who' before drafting.
-- core_issue: What is the goal of the communication?
-- options: Different angles/framings for the message.`;
-            break;
-    }
+- top_3_priorities_today: Exactly 3 critical items.
+- top_3_defer_or_ignore: Exactly 3 things to drop.
+- next_10_minutes: What to do RIGHT NOW (single action string).
+- next_24_hours: What to do by tomorrow (single action string).
+- constraint_or_boundary: E.g., "If you do only one thing...".
+- one_sharp_question: A gentle question to ground the user.`;
+      outputExample = `{
+  "problem_type": "overwhelm",
+  "core_issue": "string",
+  "top_3_priorities_today": ["priority1", "priority2", "priority3"],
+  "top_3_defer_or_ignore": ["defer1", "defer2", "defer3"],
+  "next_10_minutes": "single action",
+  "next_24_hours": "single action",
+  "constraint_or_boundary": "string",
+  "one_sharp_question": "string"
+}`;
+      break;
 
-    let prompt = `Mode: ${mode.replace("_", " ")}\n\nInput Text:\n"""\n${text}\n"""\n`;
+    case "message_prep":
+      modeInstructions = `Mode: PREP (Focus on structure and audience)
+- core_issue: Brief context of what this message/presentation is about.
+- purpose_outcome: What is the goal of this message/presentation?
+- key_points: 3-6 bullets of substance.
+- structure_outline: Object with { opening: "string", body: ["point1", "point2", ...], close: "string" }. Body MUST be an array of 2-4 strings.
+- likely_questions_or_objections: 3-6 items.
+- rehearsal_checklist: 3-6 items to check before sending/speaking.
+- one_sharp_question: A question to test the message.`;
+      outputExample = `{
+  "problem_type": "message_prep",
+  "core_issue": "string",
+  "purpose_outcome": "string",
+  "key_points": ["point1", "point2", "point3"],
+  "structure_outline": {
+    "opening": "string",
+    "body": ["bodypoint1", "bodypoint2"],
+    "close": "string"
+  },
+  "likely_questions_or_objections": ["q1", "q2", "q3"],
+  "rehearsal_checklist": ["check1", "check2", "check3"],
+  "one_sharp_question": "string"
+}`;
+      break;
+  }
 
-    if (followup_answer) {
-        prompt += `\nUser's Follow-up Answer to previous question:\n"""\n${followup_answer}\n"""\n\nIncorporate this new information to refine the assessment.`;
-    }
+  let prompt = `Mode: ${mode.replace("_", " ")}\n\nInput Text:\n"""\n${text}\n"""\n`;
 
-    prompt += `\nAnalyze the input and provide a structured intervention.
-Specific Instructions for "${mode}" mode:
-${modeInstructions}
+  if (followup_answer) {
+    prompt += `\nUser's Follow-up Answer:\n"""\n${followup_answer}\n"""\n\nIncorporate this new information to refine the assessment.`;
+  }
 
-Output as a single JSON object with:
-- "problem_type": One of "decision", "plan", "overwhelm", "message_prep".
-- "core_issue": 1-2 sentences identifying the real problem.
-- "hidden_assumptions": 2-5 non-obvious assumptions.
-- "tradeoffs": 1-3 unavoidable trade-offs.
-- "decision_levers": 1-3 variables that reduce uncertainty.
-- "options": 2-3 distinct paths forward (unless "overwhelm" mode constraints apply). For each, include "option", "why", "when_it_wins".
-- "next_steps_14_days": 3-6 concrete actions (follow "overwhelm" constraints if applicable).
-- "one_sharp_question": The single most useful follow-up question.`;
+  prompt += `\n\n${modeInstructions}\n\nOutput ONLY valid JSON in this exact format:\n${outputExample}\n\nDo NOT add any extra fields. Do NOT wrap in markdown.`;
 
-    return prompt;
+  return prompt;
 }
 
 export const COMMUNICATE_SYSTEM_PROMPT = `You are an expert communication strategist.
 Your goal is to rewrite and transform messages for specific contexts and intents.
 Constraints:
-- Do not invent facts beyond the message.
+- Do NOT invent facts beyond the message.
 - "evaluative": Signal competence, outcomes, clarity, professionalism.
 - "technical": Be precise, structured, minimal fluff, correct terminology.
 - "persuasive": Benefits-first, clear CTA, address objections lightly.
 - "personal": Warm, human, empathy, casual (unless formal=true).
-- Output MUST be valid JSON matching the requested schema.`;
+- Output MUST be valid JSON matching the requested schema.
+- Do NOT wrap JSON in markdown code blocks.`;
 
-export function buildCommunicatePrompt(message: string, contexts: string[], intent: string, options: any) {
-    const optionsDesc = [
-        options.concise ? "concise" : null,
-        options.formal ? "formal" : null,
-        options.preserveMeaning ? "preserve original meaning strictly" : null
-    ].filter(Boolean).join(", ");
+export function buildCommunicatePrompt(
+  message: string,
+  contexts: string[],
+  intent: string,
+  options: { preserveMeaning: boolean; concise: boolean; formal: boolean },
+  refiningAnswer?: string
+) {
+  const contextsStr = contexts.join(", ");
 
-    return `Input Message:
+  const prompt = `Original Message:
 """
 ${message}
 """
 
-Target Audiences/Contexts: ${contexts.join(", ")}
+Selected Contexts: ${contextsStr}
 Intent: ${intent}
-Style Modifiers: ${optionsDesc}
+Options: ${JSON.stringify(options)}
 
-Generate tailored drafts for EACH requested context.
-Output as a single JSON object with a "drafts" array.
-Each item in drafts must have:
-- "context": The specific context (e.g., "technical").
-- "intent": The intent used ("${intent}").
-- "draft": The transformed message.
-- "key_changes": Bullet points of what changed and why.
-- "tone": Brief description of the tone (e.g., "Direct and confident").`;
+${refiningAnswer ? `Refining Answer (Incorporating this into follow-up drafts):\n"""\n${refiningAnswer}\n"""\n` : ""}
+
+Generate one draft for EACH selected context (${contexts.length} total).
+
+For each draft:
+- Rewrite the message to fit the context and intent.
+- Do NOT invent facts.
+- Keep key_changes grounded (2-5 items describing what you changed).
+- Provide a tone descriptor.
+
+Also generate a refining_question: One question that, if answered, would help create even better drafts.
+
+Output ONLY valid JSON in this exact format:
+{
+  "drafts": [
+    {
+      "context": "evaluative",
+      "intent": "inform",
+      "draft": "rewritten message",
+      "key_changes": ["change1", "change2"],
+      "tone": "professional"
+    }
+  ],
+  "refining_question": "What specific outcome do you want from this message?"
+}
+
+Do NOT add extra fields. Do NOT wrap in markdown.`;
+
+  return prompt;
 }
