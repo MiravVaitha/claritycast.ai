@@ -111,7 +111,7 @@ export const CommunicateInputSchema = z.object({
 
 export const CommunicateOutputSchema = z.object({
     drafts: z.array(z.object({
-        context: z.enum(["evaluative", "technical", "persuasive", "personal"]),
+        context: z.enum(["evaluative", "technical", "persuasive", "personal", "combined"]),
         intent: z.enum(["inform", "persuade", "explain", "apologise"]),
         draft: z.string(),
         key_changes: z.array(z.string()).min(2).max(5),

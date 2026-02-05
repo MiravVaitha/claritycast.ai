@@ -141,7 +141,7 @@ Options: ${JSON.stringify(options)}
 
 ${refiningAnswer ? `Refining Answer (Incorporating this into follow-up drafts):\n"""\n${refiningAnswer}\n"""\n` : ""}
 
-Generate one draft for EACH selected context (${contexts.length} total).
+Generate one draft for EACH selected context (${contexts.length} total)${contexts.length > 1 ? " PLUS one additional 'combined' draft that intelligently blends all selected contexts" : ""}.
 
 For each draft:
 - Rewrite the message to fit the context and intent.
@@ -160,6 +160,13 @@ Output ONLY valid JSON in this exact format:
       "draft": "rewritten message",
       "key_changes": ["change1", "change2"],
       "tone": "professional"
+    },
+    {
+      "context": "combined",
+      "intent": "inform",
+      "draft": "blended rewritten message",
+      "key_changes": ["blended change1", "blended change2"],
+      "tone": "balanced and strategic"
     }
   ],
   "refining_question": "What specific outcome do you want from this message?"

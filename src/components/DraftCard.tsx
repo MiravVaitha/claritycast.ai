@@ -15,7 +15,10 @@ export default function DraftCard({ draft }: Props) {
 
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
-                <span className="px-3 py-1 bg-slate-900 text-white rounded-full text-xs font-bold uppercase tracking-wide">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${draft.context === "combined"
+                        ? "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-200"
+                        : "bg-slate-900 text-white"
+                    }`}>
                     {draft.context}
                 </span>
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest border-l border-slate-300 pl-3">

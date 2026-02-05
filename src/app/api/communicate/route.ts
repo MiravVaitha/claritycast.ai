@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 Error: ${error}
 
 Rewrite ONLY the JSON to match schema exactly. No extra keys. No markdown.
-You must generate exactly ${contexts.length} drafts (one for each context: ${contexts.join(", ")}).
+You must generate exactly ${contexts.length > 1 ? contexts.length + 1 : contexts.length} drafts (one for each context: ${contexts.join(", ")}${contexts.length > 1 ? " plus one combined draft" : ""}).
 Each draft must have: context, intent, draft, key_changes (array of 2-5 strings), tone.
 You must also include a refining_question (string).
 
