@@ -17,6 +17,64 @@ interface RateLimitInfo {
     countdown: number;
 }
 
+interface ClarityExample {
+    id: string;
+    label: string;
+    mode: ClarityMode;
+    inputText: string;
+}
+
+const CLARITY_EXAMPLES: ClarityExample[] = [
+    {
+        id: "burnout",
+        label: "Burnout Triage",
+        mode: "overwhelm",
+        inputText: "I have 12 overlapping deadlines, my inbox is at 400 unread, two team members are out sick, and I'm supposed to present a strategy doc tomorrow that I haven't started. I feel paralyzed and don't know where to begin."
+    },
+    {
+        id: "career-pivot",
+        label: "Career Pivot",
+        mode: "decision",
+        inputText: "I've been a software engineer for 8 years but I'm feeling unfulfilled. I have an offer to move into Product Management at my current company, or I could take a senior dev role at a high-growth startup for more equity but higher risk."
+    },
+    {
+        id: "project-launch",
+        label: "Project Launch",
+        mode: "plan",
+        inputText: "We need to launch the new mobile app by October 1st. We have the design ready, but the backend is only 40% done, and we haven't started QA or the marketing campaign. We need a realistic path to hitting the date."
+    },
+    {
+        id: "board-prep",
+        label: "Board Presentation",
+        mode: "message_prep",
+        inputText: "I need to present our quarterly growth numbers to the board of directors. The numbers are mostly good, but we missed our churn target. I need to explain why this happened and what we are doing to fix it without losing their confidence."
+    },
+    {
+        id: "relocation",
+        label: "Relocation Choice",
+        mode: "decision",
+        inputText: "My partner got a dream job in Berlin. We currently live in New York where my career is thriving. I can work remotely, but I'll be in a different timezone from my team. Is it worth the move for our relationship vs my career momentum?"
+    },
+    {
+        id: "startup-pivot",
+        label: "Startup Pivot",
+        mode: "plan",
+        inputText: "Our social media app isn't gaining traction with teens as expected, but high-end interior designers are using it for mood boards. We need to pivot the entire product strategy to serve this new niche in 30 days."
+    },
+    {
+        id: "work-conflict",
+        label: "Team Tension",
+        mode: "overwhelm",
+        inputText: "The tension between the design and dev teams is reaching a breaking point. Every meeting ends in an argument about technical constraints. I'm spending 4 hours a day just mediating conflicts instead of doing my actual job."
+    },
+    {
+        id: "interview-prep",
+        label: "Interview Prep",
+        mode: "message_prep",
+        inputText: "I have an interview for a CTO position at a mid-sized fintech company. I need to be able to talk about my experience scaling infrastructure while also showing I understand the business side of risk and compliance."
+    }
+];
+
 export default function ClarityPage() {
     const [inputText, setInputText] = useLocalStorage<string>("clarity_input", "");
     const [mode, setMode] = useLocalStorage<ClarityMode>("clarity_mode", "overwhelm");
@@ -24,6 +82,8 @@ export default function ClarityPage() {
     const [followupAnswer, setFollowupAnswer] = useLocalStorage<string>("clarity_followup", "");
 
     const [clarityData, setClarityData] = useState<ClarifyOutput | null>(null);
+    const [lastExampleId, setLastExampleId] = useLocalStorage<string | null>("clarity_last_example_id", null);
+    const [exampleHint, setExampleHint] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [errorDetails, setErrorDetails] = useState<any>(null);
@@ -207,13 +267,25 @@ export default function ClarityPage() {
     };
 
     const fillExample = () => {
-        const examples: Record<ClarityMode, string> = {
-            decision: "Should I take the new job offer with higher pay but longer commute, or stay at my current job with better work-life balance?",
-            plan: "Launch our new product feature by end of Q2 with full documentation and user onboarding.",
-            overwhelm: "I have 10 deadlines this week, 200 unread emails, haven't slept well in days, and my manager just added another urgent project.",
-            message_prep: "I have an internship interview next week and need to clearly explain my capstone project to non-technical interviewers."
-        };
-        setInputText(examples[mode]);
+        let available = CLARITY_EXAMPLES;
+        if (lastExampleId) {
+            available = CLARITY_EXAMPLES.filter(ex => ex.id !== lastExampleId);
+        }
+
+        const randomExample = available[Math.floor(Math.random() * available.length)];
+
+        // Reset results/errors
+        setClarityData(null);
+        setStoredData(null);
+        setFollowupAnswer("");
+        setError(null);
+        setErrorDetails(null);
+
+        // Load example
+        setInputText(randomExample.inputText);
+        setMode(randomExample.mode);
+        setLastExampleId(randomExample.id);
+        setExampleHint(randomExample.label);
     };
 
     if (!isClient) {
@@ -235,12 +307,19 @@ export default function ClarityPage() {
                     <p className="text-slate-500 mt-2">Cut through the noise. Get strategic clarity.</p>
                 </div>
                 <div className="flex gap-4">
-                    <button
-                        onClick={fillExample}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                        Use Example
-                    </button>
+                    <div className="flex flex-col items-end gap-1">
+                        <button
+                            onClick={fillExample}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                            Use Example
+                        </button>
+                        {exampleHint && (
+                            <span className="text-[10px] text-blue-400 font-medium animate-in fade-in slide-in-from-right-1">
+                                Loaded: {exampleHint}
+                            </span>
+                        )}
+                    </div>
                     <button
                         onClick={clearSession}
                         className="text-sm font-medium text-slate-400 hover:text-red-500 transition-colors"

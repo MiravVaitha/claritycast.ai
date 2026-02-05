@@ -17,10 +17,103 @@ interface RateLimitInfo {
     countdown: number;
 }
 
+type ContextType = "evaluative" | "technical" | "persuasive" | "personal";
+type IntentType = "inform" | "persuade" | "explain" | "apologise";
+
+interface CommunicationExample {
+    id: string;
+    label: string;
+    message: string;
+    contexts: ContextType[];
+    intent: IntentType;
+    options: { preserveMeaning: boolean; concise: boolean; formal: boolean };
+}
+
+const COMMUNICATION_EXAMPLES: CommunicationExample[] = [
+    {
+        id: "server-delay",
+        label: "Technical Delay",
+        message: "The server migration is delayed by 3 days because we found some inconsistent database locks during the dry run. We're fixing it now.",
+        contexts: ["technical", "evaluative"],
+        intent: "inform",
+        options: { preserveMeaning: true, concise: true, formal: true }
+    },
+    {
+        id: "salary-negotiation",
+        label: "Salary Increase",
+        message: "I've been exceeding my targets for a year and taking on extra lead-dev responsibilities. I'd like to talk about adjusting my compensation to match the market rate and my impact.",
+        contexts: ["evaluative", "persuasive"],
+        intent: "persuade",
+        options: { preserveMeaning: true, concise: false, formal: true }
+    },
+    {
+        id: "missed-deadline",
+        label: "Apology: Deadline",
+        message: "Sorry I missed the deadline for the report. I underestimated how long the data cleaning would take. I'll have it to you by tomorrow morning.",
+        contexts: ["evaluative", "personal"],
+        intent: "apologise",
+        options: { preserveMeaning: true, concise: true, formal: false }
+    },
+    {
+        id: "product-pitch",
+        label: "Feature Pitch",
+        message: "We should add a Dark Mode to the app. Users have been asking for it in every survey, and it would reduce eye strain for our晚-night users. It's a low effort for high satisfaction.",
+        contexts: ["persuasive", "technical"],
+        intent: "persuade",
+        options: { preserveMeaning: true, concise: true, formal: false }
+    },
+    {
+        id: "complex-bug",
+        label: "Bug Explanation",
+        message: "The app crashes only on iOS 14 when the user toggles Bluetooth while a video is playing. It's a race condition in the media library that we need to patch.",
+        contexts: ["technical"],
+        intent: "explain",
+        options: { preserveMeaning: true, concise: false, formal: true }
+    },
+    {
+        id: "resignation",
+        label: "Resignation",
+        message: "I'm leaving for a new opportunity. I've enjoyed my time here but it's time for me to move on. My last day will be in two weeks.",
+        contexts: ["evaluative", "personal"],
+        intent: "inform",
+        options: { preserveMeaning: true, concise: true, formal: true }
+    },
+    {
+        id: "client-apology",
+        label: "Outage Apology",
+        message: "The platform was down for 2 hours today. We had a hardware failure in our primary datacenter. We are working on a post-mortem to prevent this in the future.",
+        contexts: ["evaluative", "technical"],
+        intent: "apologise",
+        options: { preserveMeaning: true, concise: false, formal: true }
+    },
+    {
+        id: "meeting-decline",
+        label: "Decline Meeting",
+        message: "I can't make the meeting today. I have a major deadline I'm focused on and I need to prioritize execution over discussions right now. Can someone send notes?",
+        contexts: ["personal"],
+        intent: "inform",
+        options: { preserveMeaning: true, concise: true, formal: false }
+    },
+    {
+        id: "feedback-request",
+        label: "Feedback Request",
+        message: "Can you look at my design? I'm worried the navigation is too hidden. I want to know if it feels intuitive to a new user.",
+        contexts: ["personal", "technical"],
+        intent: "inform",
+        options: { preserveMeaning: true, concise: false, formal: false }
+    },
+    {
+        id: "event-invite",
+        label: "Team Social",
+        message: "We are going for drinks after work on Friday to celebrate the sprint finish. Hope everyone can come, it's been a tough week and we deserve a break!",
+        contexts: ["personal", "persuasive"],
+        intent: "inform",
+        options: { preserveMeaning: true, concise: false, formal: false }
+    }
+];
+
 export default function CommunicationPage() {
     const [inputText, setInputText] = useLocalStorage<string>("communication_input", "");
-
-    type ContextType = "evaluative" | "technical" | "persuasive" | "personal";
     const [contexts, setContexts] = useLocalStorage<ContextType[]>("communication_contexts", []);
 
     const [intent, setIntent] = useLocalStorage<string>("communication_intent", "inform");
@@ -34,6 +127,8 @@ export default function CommunicationPage() {
     const [refiningAnswer, setRefiningAnswer] = useLocalStorage<string>("communication_refine_answer", "");
 
     const [draftsData, setDraftsData] = useState<CommunicateOutput | null>(null);
+    const [lastExampleId, setLastExampleId] = useLocalStorage<string | null>("communication_last_example_id", null);
+    const [exampleHint, setExampleHint] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [errorDetails, setErrorDetails] = useState<any>(null);
@@ -216,10 +311,28 @@ export default function CommunicationPage() {
     };
 
     const fillExample = () => {
-        setInputText("I need to tell my boss that the project is delayed by 2 weeks because the backend team changed the API without telling us.");
-        setContexts(["evaluative", "technical"]);
-        setIntent("inform");
-    }
+        let available = COMMUNICATION_EXAMPLES;
+        if (lastExampleId) {
+            available = COMMUNICATION_EXAMPLES.filter(ex => ex.id !== lastExampleId);
+        }
+
+        const randomExample = available[Math.floor(Math.random() * available.length)];
+
+        // Reset results/errors
+        setDraftsData(null);
+        setStoredData(null);
+        setRefiningAnswer("");
+        setError(null);
+        setErrorDetails(null);
+
+        // Load example
+        setInputText(randomExample.message);
+        setContexts(randomExample.contexts);
+        setIntent(randomExample.intent);
+        setOptions(randomExample.options);
+        setLastExampleId(randomExample.id);
+        setExampleHint(randomExample.label);
+    };
 
     if (!isClient) {
         return (
@@ -240,12 +353,19 @@ export default function CommunicationPage() {
                     <p className="text-slate-500 mt-2">Tailor your message for the right audience and intent.</p>
                 </div>
                 <div className="flex gap-4">
-                    <button
-                        onClick={fillExample}
-                        className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
-                    >
-                        Use Example
-                    </button>
+                    <div className="flex flex-col items-end gap-1">
+                        <button
+                            onClick={fillExample}
+                            className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                        >
+                            Use Example
+                        </button>
+                        {exampleHint && (
+                            <span className="text-[10px] text-indigo-400 font-medium animate-in fade-in slide-in-from-right-1">
+                                Loaded: {exampleHint}
+                            </span>
+                        )}
+                    </div>
                     <button
                         onClick={clearSession}
                         className="text-sm font-medium text-slate-400 hover:text-red-500 transition-colors"
