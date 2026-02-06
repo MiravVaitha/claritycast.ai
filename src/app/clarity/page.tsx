@@ -8,6 +8,7 @@ import ResponsiveLayout from "@/components/ResponsiveLayout";
 import CollapsibleSection from "@/components/CollapsibleSection";
 import { stableHash, getCachedResult, setCachedResult, clearExpiredCache } from "@/lib/aiCache";
 import { apiClient, APIError } from "@/lib/api-client";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 interface ClarityStoredData {
     requestHash: string;
@@ -70,6 +71,7 @@ export default function ClarityPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
     const [isClient, setIsClient] = useState(false);
     const hasHydrated = useRef(false);
@@ -174,13 +176,12 @@ export default function ClarityPage() {
                 setCachedResult(cacheKey, data);
             }
         } catch (err: any) {
-            const apiErr = err as APIError;
-            if (apiErr.errorType === "RATE_LIMIT") {
-                const retryAfter = apiErr.retryAfterSeconds || 60;
+            if (err.errorType === "RATE_LIMIT") {
+                const retryAfter = err.retryAfterSeconds || 60;
                 setRateLimitInfo({ retryAfterSeconds: retryAfter, countdown: retryAfter });
-                setError(apiErr.message);
+                setError(err.message);
             } else {
-                setError(apiErr.message || "Failed to generate clarity assessment");
+                setError(err.message || "Failed to generate clarity assessment");
             }
         } finally {
             setIsLoading(false);
@@ -188,12 +189,11 @@ export default function ClarityPage() {
     };
 
     const clearSession = () => {
-        if (typeof window !== "undefined" && window.confirm("Clear current session?")) {
-            setInputText("");
-            setClarityData(null);
-            setStoredData(null);
-            setFollowupAnswer("");
-        }
+        setInputText("");
+        setClarityData(null);
+        setStoredData(null);
+        setFollowupAnswer("");
+        setIsResetModalOpen(false);
     };
 
     const fillExample = () => {
@@ -337,11 +337,21 @@ export default function ClarityPage() {
                     )}
                 </button>
                 {clarityData && (
-                    <button onClick={clearSession} className="w-full py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors">
+                    <button onClick={() => setIsResetModalOpen(true)} className="w-full py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors">
                         Reset Session
                     </button>
                 )}
             </div>
+
+            <ConfirmationModal
+                isOpen={isResetModalOpen}
+                title="Reset session?"
+                message="This will clear your current input, results, and refining questions."
+                confirmLabel="Reset session"
+                onConfirm={clearSession}
+                onCancel={() => setIsResetModalOpen(false)}
+                variant="destructive"
+            />
         </div>
     );
 
