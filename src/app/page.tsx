@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Login() {
   const router = useRouter();
@@ -12,9 +14,11 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 mb-2">ClarityCast</h1>
-          <p className="text-slate-500">Turn chaos into clear communication.</p>
+        <div className="text-center mb-10 flex flex-col items-center">
+          <div className="mb-4">
+            <BrandLogo size="auth" />
+          </div>
+          <p className="text-slate-500 text-center">Turn chaos into clear communication.</p>
         </div>
 
         <div className="space-y-4">

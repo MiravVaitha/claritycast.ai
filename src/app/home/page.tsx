@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Home() {
     const router = useRouter();
@@ -23,7 +25,10 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Hero Section */}
-            <section className="py-20 px-8 text-center bg-white border-b border-slate-100">
+            <section className="py-20 px-8 text-center bg-white border-b border-slate-100 flex flex-col items-center">
+                <div className="mb-8 flex justify-center">
+                    <BrandLogo size="hero" />
+                </div>
                 <div className="max-w-4xl mx-auto space-y-6">
                     <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">
                         Unblock Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Thought Process</span>
