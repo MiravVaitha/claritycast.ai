@@ -22,13 +22,13 @@ export default function CollapsibleSection({
     const [isOpen, setIsOpen] = useState(defaultOpen);
 
     const variants = {
-        default: "bg-white border-slate-200 text-slate-900 shadow-sm",
-        amber: "bg-amber-50 border-amber-200 text-amber-900",
-        blue: "bg-blue-50 border-blue-200 text-blue-900",
-        indigo: "bg-indigo-50 border-indigo-200 text-indigo-900",
-        rose: "bg-rose-50 border-rose-200 text-rose-900",
-        green: "bg-green-50 border-green-200 text-green-900",
-        purple: "bg-purple-50 border-purple-200 text-purple-900",
+        default: "bg-white/40 backdrop-blur-xl border-white/20 text-slate-900 shadow-sm",
+        amber: "bg-amber-400/10 backdrop-blur-xl border-amber-400/20 text-amber-900 shadow-sm",
+        blue: "bg-blue-400/10 backdrop-blur-xl border-blue-400/20 text-blue-900 shadow-sm",
+        indigo: "bg-indigo-400/10 backdrop-blur-xl border-indigo-400/20 text-indigo-900 shadow-sm",
+        rose: "bg-rose-400/10 backdrop-blur-xl border-rose-400/20 text-rose-900 shadow-sm",
+        green: "bg-green-400/10 backdrop-blur-xl border-green-400/20 text-green-900 shadow-sm",
+        purple: "bg-purple-400/10 backdrop-blur-xl border-purple-400/20 text-purple-900 shadow-sm",
     };
 
     const iconColors = {

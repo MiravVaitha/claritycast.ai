@@ -77,7 +77,7 @@ export default function ResponsiveLayout({
                 {/* Right Column / Results Tab */}
                 <section
                     className={`${isMobile ? (activeTab === "results" ? "block" : "hidden") : "lg:col-span-7"
-                        } lg:sticky lg:top-8 lg:h-[calc(100vh-120px)] lg:overflow-y-auto scrollbar-hide`}
+                        } lg:sticky lg:top-24 h-fit`}
                 >
                     <div className="space-y-6">
                         {!isMobile && (

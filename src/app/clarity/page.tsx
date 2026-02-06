@@ -216,11 +216,11 @@ export default function ClarityPage() {
     const leftContent = (
         <div className="space-y-6">
             <header className="flex flex-col gap-2">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-on-bg-heading flex items-center gap-3">
                     <span className="w-2 md:w-3 h-8 bg-blue-600 rounded-full"></span>
                     Clarity Engine
                 </h1>
-                <p className="text-slate-500 text-sm md:text-base">Cut through the noise. Get strategic clarity.</p>
+                <p className="text-on-bg-body text-sm md:text-base">Cut through the noise. Get strategic clarity.</p>
             </header>
 
             {/* Inputs in Accordion for Mobile */}
@@ -229,7 +229,7 @@ export default function ClarityPage() {
                     <div className="space-y-6 pt-2">
                         {/* Mode Selection */}
                         <div className="space-y-3">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Analysis Mode</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Analysis Mode</label>
                             <div className="grid grid-cols-2 gap-2">
                                 {[
                                     { id: "decision" as ClarityMode, label: "Decision", icon: "⚖️" },
@@ -241,8 +241,8 @@ export default function ClarityPage() {
                                         key={m.id}
                                         onClick={() => setMode(m.id)}
                                         className={`p-3 text-left rounded-xl border transition-all ${mode === m.id
-                                            ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-100"
-                                            : "bg-white border-slate-200 text-slate-600 hover:border-blue-300"
+                                            ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20"
+                                            : "bg-white/40 border-white/20 text-slate-700 hover:bg-white/60"
                                             }`}
                                     >
                                         <div className="flex items-center gap-2">
@@ -256,14 +256,14 @@ export default function ClarityPage() {
 
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your Thoughts</label>
-                                <button onClick={fillExample} className="text-[10px] font-bold text-blue-600 uppercase hover:underline">Use Example</button>
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Your Thoughts</label>
+                                <button onClick={fillExample} className="text-[10px] font-bold text-blue-400 uppercase hover:underline">Use Example</button>
                             </div>
                             <textarea
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                                 placeholder="Unpack your brain here..."
-                                className="w-full h-40 p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none transition-all resize-none text-sm leading-relaxed"
+                                className="w-full h-40 p-4 bg-white/40 border border-white/20 rounded-2xl focus:ring-2 focus:ring-blue-600 focus:bg-white/60 outline-none transition-all resize-none text-sm leading-relaxed text-slate-800 placeholder:text-slate-400"
                             />
                         </div>
                     </div>
@@ -273,7 +273,7 @@ export default function ClarityPage() {
             {/* Desktop Inputs (Not collapsed) */}
             <div className="hidden lg:block space-y-8">
                 <div className="space-y-4">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Analysis Mode</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Analysis Mode</label>
                     <div className="grid grid-cols-2 gap-2">
                         {[
                             { id: "decision" as ClarityMode, label: "Decision", icon: "⚖️", desc: "Compare" },
@@ -285,13 +285,13 @@ export default function ClarityPage() {
                                 key={m.id}
                                 onClick={() => setMode(m.id)}
                                 className={`p-4 text-left rounded-2xl border transition-all ${mode === m.id
-                                    ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]"
-                                    : "bg-white border-slate-200 text-slate-600 hover:border-blue-300"
+                                    ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-500/30 scale-[1.02]"
+                                    : "bg-white/40 border-white/20 text-slate-700 hover:bg-white/60 hover:border-white/40"
                                     }`}
                             >
                                 <span className="text-xl block mb-1">{m.icon}</span>
                                 <span className="font-bold text-xs uppercase tracking-wider">{m.label}</span>
-                                <p className={`text-[10px] ${mode === m.id ? "text-blue-100" : "text-slate-400"}`}>{m.desc}</p>
+                                <p className={`text-[10px] ${mode === m.id ? "text-blue-100" : "text-slate-500"}`}>{m.desc}</p>
                             </button>
                         ))}
                     </div>
@@ -299,8 +299,8 @@ export default function ClarityPage() {
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your Thoughts</label>
-                        <button onClick={fillExample} className="text-[10px] font-bold text-blue-600 uppercase hover:underline flex items-center gap-1">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Your Thoughts</label>
+                        <button onClick={fillExample} className="text-[10px] font-bold text-blue-400 uppercase hover:underline flex items-center gap-1">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                             Use Example
                         </button>
@@ -309,7 +309,7 @@ export default function ClarityPage() {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Unpack your brain here..."
-                        className="w-full h-64 p-5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all resize-none text-base leading-relaxed"
+                        className="w-full h-64 p-5 bg-white/40 border border-white/20 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 focus:bg-white/60 outline-none transition-all resize-none text-base leading-relaxed text-slate-800 placeholder:text-slate-400"
                     />
                 </div>
             </div>
@@ -362,7 +362,7 @@ export default function ClarityPage() {
                     <ClarityResults data={clarityData} />
 
                     {/* Refining Question Card */}
-                    <div className="p-6 bg-blue-50 border border-blue-200 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="p-6 glass-light !bg-blue-600/10 !border-blue-400/20 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
                             <div className="bg-blue-600 text-white p-2 rounded-lg">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
@@ -375,12 +375,12 @@ export default function ClarityPage() {
                                 value={followupAnswer}
                                 onChange={(e) => setFollowupAnswer(e.target.value)}
                                 placeholder="Your answer..."
-                                className="w-full h-24 p-4 bg-white border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition-all resize-none text-sm placeholder:text-blue-300"
+                                className="w-full h-24 p-4 bg-white/50 border border-blue-200/40 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition-all resize-none text-sm placeholder:text-blue-400 text-slate-800"
                             />
                             <button
                                 onClick={() => handleGenerate(true)}
                                 disabled={isLoading || !followupAnswer.trim()}
-                                className="w-full py-3 bg-white text-blue-600 border border-blue-200 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm disabled:opacity-50"
+                                className="w-full py-3 bg-white text-blue-600 border border-blue-200/50 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm disabled:opacity-50 active:scale-95"
                             >
                                 {isLoading ? "Refining..." : "Refine Assessment"}
                             </button>
@@ -388,10 +388,10 @@ export default function ClarityPage() {
                     </div>
                 </>
             ) : (
-                <div className="h-[400px] flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
-                    <div className="w-16 h-16 mb-6 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-3xl shadow-sm">⚡</div>
-                    <h3 className="font-bold text-slate-900 mb-2">Ready for Clarity?</h3>
-                    <p className="text-slate-500 text-sm max-w-xs">Enter your thoughts on the left to generate a strategic breakdown.</p>
+                <div className="h-[400px] flex flex-col items-center justify-center text-center p-8 glass-light !bg-white/10 !border-dashed !border-white/20">
+                    <div className="w-16 h-16 mb-6 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-3xl shadow-sm">⚡</div>
+                    <h3 className="font-bold text-white mb-2">Ready for Clarity?</h3>
+                    <p className="text-white/60 text-sm max-w-xs">Enter your thoughts on the left to generate a strategic breakdown.</p>
                 </div>
             )}
         </div>

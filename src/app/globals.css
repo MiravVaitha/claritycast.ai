@@ -8,16 +8,124 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --shadow-glass: 0 20px 60px rgba(0, 0, 0, 0.25);
+  --shadow-glass-dark: 0 20px 60px rgba(0, 0, 0, 0.35);
+
+  --animation-first: moveVertical 30s ease infinite;
+  --animation-second: moveInCircle 20s reverse infinite;
+  --animation-third: moveInCircle 40s linear infinite;
+  --animation-fourth: moveHorizontal 40s ease infinite;
+  --animation-fifth: moveInCircle 20s ease infinite;
+
+  @keyframes moveHorizontal {
+    0% {
+      transform: translateX(-50%) translateY(-10%);
+    }
+
+    50% {
+      transform: translateX(50%) translateY(10%);
+    }
+
+    100% {
+      transform: translateX(-50%) translateY(-10%);
+    }
+  }
+
+  @keyframes moveInCircle {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    50% {
+      transform: rotate(180deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes moveVertical {
+    0% {
+      transform: translateY(-50%);
+    }
+
+    50% {
+      transform: translateY(50%);
+    }
+
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+
+  @keyframes float-slow {
+
+    0%,
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+      transform: translate(-45%, -55%) scale(1.1);
+    }
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 10s ease-in-out infinite;
+}
+
+html,
+body {
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
+  background: transparent;
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @layer components {
   .card {
     @apply bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden;
+  }
+
+  .glass-light {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-glass rounded-2xl;
+  }
+
+  .glass-dark {
+    @apply bg-slate-900/45 backdrop-blur-xl border border-white/10 shadow-glass-dark rounded-2xl text-white;
+  }
+
+  /* Global Typography on Background */
+  .text-on-bg-heading {
+    @apply text-white/90;
+  }
+
+  .text-on-bg-body {
+    @apply text-white/70;
+  }
+
+  .text-on-bg-muted {
+    @apply text-white/50;
+  }
+
+  /* Typography inside Light Glass */
+  .glass-light h1,
+  .glass-light h2,
+  .glass-light h3,
+  .glass-light .heading {
+    @apply text-slate-900;
+  }
+
+  .glass-light p,
+  .glass-light .body {
+    @apply text-slate-600;
   }
 }

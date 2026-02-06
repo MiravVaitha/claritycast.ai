@@ -18,19 +18,19 @@ export default function Navbar() {
     if (pathname === "/") return null;
 
     return (
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-            <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+        <nav className="sticky top-0 z-50 px-4 py-4 md:px-8">
+            <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16 glass-light !bg-white/35 !rounded-2xl !border-white/15 !shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
                 <BrandLogo size="nav" />
 
                 <div className="hidden md:flex items-center gap-8">
-                    <Link href="/home" className={`text-sm font-medium transition-colors ${pathname === '/home' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>Home</Link>
-                    <Link href="/clarity" className={`text-sm font-medium transition-colors ${pathname === '/clarity' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>Clarity</Link>
-                    <Link href="/communication" className={`text-sm font-medium transition-colors ${pathname === '/communication' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>Communication</Link>
+                    <Link href="/home" className={`text-sm font-bold transition-all hover:scale-105 ${pathname === '/home' ? 'text-slate-900' : 'text-slate-600/80 hover:text-slate-900'}`}>Home</Link>
+                    <Link href="/clarity" className={`text-sm font-bold transition-all hover:scale-105 ${pathname === '/clarity' ? 'text-slate-900' : 'text-slate-600/80 hover:text-slate-900'}`}>Clarity</Link>
+                    <Link href="/communication" className={`text-sm font-bold transition-all hover:scale-105 ${pathname === '/communication' ? 'text-slate-900' : 'text-slate-600/80 hover:text-slate-900'}`}>Communication</Link>
                 </div>
 
                 <button
                     onClick={handleLogout}
-                    className="text-sm font-medium text-slate-500 hover:text-red-600 transition-colors"
+                    className="text-sm font-bold text-slate-500 hover:text-red-500 transition-all hover:scale-105"
                 >
                     Logout
                 </button>

@@ -281,11 +281,14 @@ export default function ClarityResults({ data }: Props) {
             )}
 
             {/* The Sharp Question */}
-            <div className="p-6 bg-slate-900 rounded-2xl shadow-xl text-white">
-                <h3 className="font-bold text-slate-400 mb-2 uppercase tracking-widest text-[10px]">
-                    {isOverwhelm ? "Reflection Question" : "The Sharp Question"}
+            <div className="p-8 glass-dark !rounded-3xl shadow-2xl relative overflow-hidden group">
+                <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-white/5 blur-3xl rounded-full" />
+                <h3 className="font-bold text-white/40 mb-3 uppercase tracking-[0.2em] text-[10px]">
+                    {isOverwhelm ? "Reflection" : "The Sharp Question"}
                 </h3>
-                <p className="text-lg md:text-xl font-medium leading-relaxed italic">"{sharp_question}"</p>
+                <p className="text-xl md:text-2xl font-medium leading-relaxed italic text-white/95">
+                    &quot;{sharp_question}&quot;
+                </p>
             </div>
         </div>
     );

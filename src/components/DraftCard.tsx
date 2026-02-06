@@ -19,8 +19,8 @@ export default function DraftCard({ draft }: Props) {
     };
 
     return (
-        <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none">
+        <div className="p-6 glass-light !rounded-2xl shadow-sm relative overflow-hidden group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+            <div className="absolute top-0 right-0 p-3 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
                 <svg className="w-16 h-16 text-slate-900" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
                 </svg>
@@ -28,31 +28,31 @@ export default function DraftCard({ draft }: Props) {
 
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${draft.context === "combined"
-                    ? "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-200"
+                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${draft.context === "combined"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
                     : "bg-slate-900 text-white"
                     }`}>
                     {draft.context}
                 </span>
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest border-l border-slate-300 pl-3">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest border-l border-slate-300 pl-3">
                     {draft.intent}
                 </span>
-                <div className="ml-auto text-xs font-medium text-slate-500 italic">
+                <div className="ml-auto text-[10px] font-bold text-slate-400 italic uppercase tracking-wider">
                     {draft.tone}
                 </div>
             </div>
 
             {/* Draft Content */}
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 mb-4">
-                <p className="text-slate-800 leading-relaxed whitespace-pre-wrap font-medium">{draft.draft}</p>
+            <div className="p-5 bg-white/40 rounded-xl border border-white/20 mb-4 group-hover:bg-white/60 transition-colors">
+                <p className="text-slate-800 leading-relaxed whitespace-pre-wrap font-medium text-sm md:text-base">{draft.draft}</p>
             </div>
 
             {/* Key Changes */}
-            <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Key Adjusments</h4>
+            <div className="space-y-3">
+                <h4 className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Key Adjustments</h4>
                 <div className="flex flex-wrap gap-2">
                     {draft.key_changes.map((change, i) => (
-                        <span key={i} className="px-2 py-1 bg-white border border-slate-200 text-slate-600 rounded-md text-[10px] uppercase font-bold shadow-sm">
+                        <span key={i} className="px-2.5 py-1 bg-white/50 border border-white/30 text-slate-600 rounded-lg text-[10px] uppercase font-bold shadow-sm transition-colors hover:bg-white/80">
                             {change}
                         </span>
                     ))}
@@ -64,8 +64,8 @@ export default function DraftCard({ draft }: Props) {
                 <button
                     onClick={handleCopy}
                     className={`text-xs font-bold transition-all flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${copied
-                            ? "text-green-600 border-green-200 bg-green-50"
-                            : "text-indigo-600 border-transparent hover:bg-indigo-50 active:scale-95"
+                        ? "text-green-600 border-green-200 bg-green-50"
+                        : "text-indigo-600 border-transparent hover:bg-indigo-50 active:scale-95"
                         }`}
                     aria-live="polite"
                 >

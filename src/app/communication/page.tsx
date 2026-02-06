@@ -231,11 +231,11 @@ export default function CommunicationPage() {
     const leftContent = (
         <div className="space-y-6">
             <header className="flex flex-col gap-2">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-on-bg-heading flex items-center gap-3">
                     <span className="w-2 md:w-3 h-8 bg-indigo-600 rounded-full"></span>
                     Communication Engine
                 </h1>
-                <p className="text-slate-500 text-sm md:text-base">Tailor your message for the right audience and intent.</p>
+                <p className="text-on-bg-body text-sm md:text-base">Tailor your message for the right audience and intent.</p>
             </header>
 
             {/* Mobile Settings Accordion */}
@@ -244,19 +244,19 @@ export default function CommunicationPage() {
                     <div className="space-y-6 pt-2">
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">The Message</label>
-                                <button onClick={fillExample} className="text-[10px] font-bold text-indigo-600 uppercase hover:underline">Use Example</button>
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">The Message</label>
+                                <button onClick={fillExample} className="text-[10px] font-bold text-indigo-400 uppercase hover:underline">Use Example</button>
                             </div>
                             <textarea
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                                 placeholder="What do you want to say?"
-                                className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none transition-all resize-none text-sm leading-relaxed"
+                                className="w-full h-32 p-4 bg-white/40 border border-white/20 rounded-2xl focus:ring-2 focus:ring-indigo-600 focus:bg-white/60 outline-none transition-all resize-none text-sm leading-relaxed text-slate-800 placeholder:text-slate-400"
                             />
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Context</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Context</label>
                             <div className="grid grid-cols-2 gap-2">
                                 {[
                                     { id: "evaluative", label: "Evaluative" },
@@ -268,8 +268,8 @@ export default function CommunicationPage() {
                                         key={c.id}
                                         onClick={() => toggleContext(c.id as ContextType)}
                                         className={`p-3 text-center rounded-xl border transition-all font-bold text-xs uppercase tracking-wider ${contexts.includes(c.id as ContextType)
-                                            ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-100"
-                                            : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300"
+                                            ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/20"
+                                            : "bg-white/40 border-white/20 text-slate-700 hover:bg-white/60"
                                             }`}
                                     >
                                         {c.label}
@@ -279,7 +279,7 @@ export default function CommunicationPage() {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Intent & Tuning</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Intent & Tuning</label>
                             <select
                                 value={intent}
                                 onChange={(e) => setIntent(e.target.value)}
@@ -289,7 +289,7 @@ export default function CommunicationPage() {
                                     <option key={i} value={i} className="capitalize">{i}</option>
                                 ))}
                             </select>
-                            <div className="flex flex-wrap gap-3 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                            <div className="flex flex-wrap gap-3 p-3 bg-indigo-50/20 rounded-xl border border-indigo-200/30">
                                 {[
                                     { key: "preserveMeaning", label: "Faithful" },
                                     { key: "concise", label: "Concise" },
@@ -302,7 +302,7 @@ export default function CommunicationPage() {
                                             onChange={() => setOptions(prev => ({ ...prev, [opt.key]: !(prev as any)[opt.key] }))}
                                             className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
                                         />
-                                        <span className="text-[10px] font-bold uppercase text-indigo-900/60 group-hover:text-indigo-900 transition-colors uppercase tracking-widest">{opt.label}</span>
+                                        <span className="text-[10px] font-bold uppercase text-indigo-900 group-hover:text-indigo-700 transition-colors uppercase tracking-widest">{opt.label}</span>
                                     </label>
                                 ))}
                             </div>
@@ -315,8 +315,8 @@ export default function CommunicationPage() {
             <div className="hidden lg:block space-y-8">
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">The Message</label>
-                        <button onClick={fillExample} className="text-[10px] font-bold text-indigo-600 hover:underline flex items-center gap-1">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">The Message</label>
+                        <button onClick={fillExample} className="text-[10px] font-bold text-indigo-400 hover:underline flex items-center gap-1">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                             Use Example
                         </button>
@@ -325,12 +325,12 @@ export default function CommunicationPage() {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="What do you want to say?"
-                        className="w-full h-56 p-5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-600 outline-none transition-all resize-none text-base leading-relaxed"
+                        className="w-full h-56 p-5 bg-white/40 border border-white/20 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-600 focus:bg-white/60 outline-none transition-all resize-none text-base leading-relaxed text-slate-800 placeholder:text-slate-400"
                     />
                 </div>
 
                 <div className="space-y-4">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Audience Context</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Audience Context</label>
                     <div className="grid grid-cols-2 gap-2">
                         {[
                             { id: "evaluative", label: "Evaluative", desc: "Professional" },
@@ -342,30 +342,30 @@ export default function CommunicationPage() {
                                 key={c.id}
                                 onClick={() => toggleContext(c.id as ContextType)}
                                 className={`p-4 text-left rounded-2xl border transition-all ${contexts.includes(c.id as ContextType)
-                                    ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100 scale-[1.02]"
-                                    : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300"
+                                    ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-500/30 scale-[1.02]"
+                                    : "bg-white/40 border-white/20 text-slate-700 hover:bg-white/60 hover:border-white/40"
                                     }`}
                             >
                                 <span className="font-bold text-xs uppercase tracking-wider block">{c.label}</span>
-                                <span className={`text-[10px] ${contexts.includes(c.id as ContextType) ? "text-indigo-100" : "text-slate-400"}`}>{c.desc}</span>
+                                <span className={`text-[10px] ${contexts.includes(c.id as ContextType) ? "text-indigo-100" : "text-slate-500"}`}>{c.desc}</span>
                             </button>
                         ))}
                     </div>
                 </div>
 
                 <div className="space-y-4 pt-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Intent & Constraints</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Intent & Constraints</label>
                     <div className="flex gap-4">
                         <select
                             value={intent}
                             onChange={(e) => setIntent(e.target.value)}
-                            className="flex-1 p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm font-bold uppercase tracking-wider"
+                            className="flex-1 p-3 bg-white/40 border border-white/20 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm font-bold uppercase tracking-wider text-slate-800"
                         >
                             {["inform", "persuade", "explain", "apologise"].map((i) => (
                                 <option key={i} value={i} className="capitalize">{i}</option>
                             ))}
                         </select>
-                        <div className="flex items-center gap-4 px-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <div className="flex items-center gap-4 px-4 bg-indigo-50/20 border border-indigo-200/30 rounded-xl">
                             {[
                                 { key: "preserveMeaning", label: "Meaning" },
                                 { key: "concise", label: "Concise" },
@@ -378,7 +378,7 @@ export default function CommunicationPage() {
                                         onChange={() => setOptions(prev => ({ ...prev, [opt.key]: !(prev as any)[opt.key] }))}
                                         className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
                                     />
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-900 transition-colors">{opt.label}</span>
+                                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest group-hover:text-slate-900 transition-colors">{opt.label}</span>
                                 </label>
                             ))}
                         </div>
@@ -432,7 +432,7 @@ export default function CommunicationPage() {
             {draftsData ? (
                 <>
                     {/* Refining Question Card */}
-                    <div className="p-6 bg-indigo-50 border border-indigo-200 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="p-6 glass-light !bg-indigo-600/10 !border-indigo-400/20 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
                             <div className="bg-indigo-600 text-white p-2 rounded-lg">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -445,12 +445,12 @@ export default function CommunicationPage() {
                                 value={refiningAnswer}
                                 onChange={(e) => setRefiningAnswer(e.target.value)}
                                 placeholder="Your answer..."
-                                className="w-full h-24 p-4 bg-white border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none transition-all resize-none text-sm placeholder:text-indigo-300"
+                                className="w-full h-24 p-4 bg-white/50 border border-indigo-200/40 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none transition-all resize-none text-sm placeholder:text-indigo-400 text-slate-800"
                             />
                             <button
                                 onClick={() => handleGenerate(true)}
                                 disabled={isLoading || !refiningAnswer.trim()}
-                                className="w-full py-3 bg-white text-indigo-600 border border-indigo-200 rounded-xl font-bold hover:bg-indigo-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm disabled:opacity-50"
+                                className="w-full py-3 bg-white text-indigo-600 border border-indigo-200/50 rounded-xl font-bold hover:bg-indigo-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm disabled:opacity-50 active:scale-95"
                             >
                                 {isLoading ? "Refining..." : "Update Drafts"}
                             </button>
@@ -464,10 +464,10 @@ export default function CommunicationPage() {
                     </div>
                 </>
             ) : (
-                <div className="h-[400px] flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
-                    <div className="w-16 h-16 mb-6 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-3xl shadow-sm">✍️</div>
-                    <h3 className="font-bold text-slate-900 mb-2">Write with Impact</h3>
-                    <p className="text-slate-500 text-sm max-w-xs">Define your audience and message to see tailored drafts here.</p>
+                <div className="h-[400px] flex flex-col items-center justify-center text-center p-8 glass-light !bg-white/10 !border-dashed !border-white/20">
+                    <div className="w-16 h-16 mb-6 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-3xl shadow-sm">✍️</div>
+                    <h3 className="font-bold text-white mb-2">Write with Impact</h3>
+                    <p className="text-white/60 text-sm max-w-xs">Define your audience and message to see tailored drafts here.</p>
                 </div>
             )}
         </div>
