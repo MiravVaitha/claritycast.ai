@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { ClarifyOutput, ClarifyOutputSchema, ClarityMode } from "@/lib/schemas";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import ClarityResults from "@/components/ClarityCard";
+import ResponsiveLayout from "@/components/ResponsiveLayout";
+import CollapsibleSection from "@/components/CollapsibleSection";
 import { stableHash, getCachedResult, setCachedResult, clearExpiredCache } from "@/lib/aiCache";
 import { apiClient, APIError } from "@/lib/api-client";
 
@@ -50,29 +52,11 @@ const CLARITY_EXAMPLES: ClarityExample[] = [
         inputText: "I need to present our quarterly growth numbers to the board of directors. The numbers are mostly good, but we missed our churn target. I need to explain why this happened and what we are doing to fix it without losing their confidence."
     },
     {
-        id: "relocation",
-        label: "Relocation Choice",
-        mode: "decision",
-        inputText: "My partner got a dream job in Berlin. We currently live in New York where my career is thriving. I can work remotely, but I'll be in a different timezone from my team. Is it worth the move for our relationship vs my career momentum?"
-    },
-    {
         id: "startup-pivot",
         label: "Startup Pivot",
         mode: "plan",
         inputText: "Our social media app isn't gaining traction with teens as expected, but high-end interior designers are using it for mood boards. We need to pivot the entire product strategy to serve this new niche in 30 days."
     },
-    {
-        id: "work-conflict",
-        label: "Team Tension",
-        mode: "overwhelm",
-        inputText: "The tension between the design and dev teams is reaching a breaking point. Every meeting ends in an argument about technical constraints. I'm spending 4 hours a day just mediating conflicts instead of doing my actual job."
-    },
-    {
-        id: "interview-prep",
-        label: "Interview Prep",
-        mode: "message_prep",
-        inputText: "I have an interview for a CTO position at a mid-sized fintech company. I need to be able to talk about my experience scaling infrastructure while also showing I understand the business side of risk and compliance."
-    }
 ];
 
 export default function ClarityPage() {
@@ -83,13 +67,10 @@ export default function ClarityPage() {
 
     const [clarityData, setClarityData] = useState<ClarifyOutput | null>(null);
     const [lastExampleId, setLastExampleId] = useLocalStorage<string | null>("clarity_last_example_id", null);
-    const [exampleHint, setExampleHint] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [errorDetails, setErrorDetails] = useState<any>(null);
     const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
 
-    const resultsRef = useRef<HTMLDivElement>(null);
     const [isClient, setIsClient] = useState(false);
     const hasHydrated = useRef(false);
     const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -102,12 +83,6 @@ export default function ClarityPage() {
         });
     };
 
-    // Clear expired cache on mount
-    useEffect(() => {
-        setIsClient(true);
-        clearExpiredCache();
-    }, []);
-
     // Initial hydration ONLY on mount
     useEffect(() => {
         setIsClient(true);
@@ -117,32 +92,19 @@ export default function ClarityPage() {
 
         const restore = async () => {
             if (!storedData) return;
-
-            // Load results first to see mode/text that generated them
-            const validation = ClarifyOutputSchema.safeParse(storedData.result);
-            if (!validation.success) {
-                console.warn("Invalid stored Clarity data");
-                setStoredData(null);
-                setClarityData(null);
-                return;
-            }
-
-            // Restore clarity data if hashes match
             const currentHash = await computeBaseHash(inputText, mode);
             if (storedData.requestHash === currentHash) {
                 setClarityData(storedData.result);
             }
-
             hasHydrated.current = true;
         };
 
         restore();
-    }, []); // Run ONLY once on mount
+    }, [inputText, mode, storedData]);
 
     // Clear answer when inputs change
     useEffect(() => {
         if (!isClient || !clarityData || !storedData) return;
-
         const validate = async () => {
             const currentHash = await computeBaseHash(inputText, mode);
             if (storedData.requestHash !== currentHash) {
@@ -152,34 +114,20 @@ export default function ClarityPage() {
         validate();
     }, [inputText, mode, isClient]);
 
-    // Clear data when mode changes
-    useEffect(() => {
-        if (clarityData && clarityData.problem_type !== mode) {
-            setClarityData(null);
-            setStoredData(null);
-            setFollowupAnswer("");
-        }
-    }, [mode]);
-
     // Countdown timer for rate limit
     useEffect(() => {
         if (rateLimitInfo && rateLimitInfo.countdown > 0) {
             countdownIntervalRef.current = setInterval(() => {
                 setRateLimitInfo(prev => {
                     if (!prev || prev.countdown <= 1) {
-                        if (countdownIntervalRef.current) {
-                            clearInterval(countdownIntervalRef.current);
-                        }
+                        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
                         return null;
                     }
                     return { ...prev, countdown: prev.countdown - 1 };
                 });
             }, 1000);
-
             return () => {
-                if (countdownIntervalRef.current) {
-                    clearInterval(countdownIntervalRef.current);
-                }
+                if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
             };
         }
     }, [rateLimitInfo]);
@@ -200,48 +148,31 @@ export default function ClarityPage() {
 
         setIsLoading(true);
         setError(null);
-        setErrorDetails(null);
         setRateLimitInfo(null);
 
         try {
-            // Check cache (only for non-refining requests)
             if (!isRefining) {
                 const cacheKey = await stableHash(request);
                 const cached = getCachedResult(cacheKey);
-
                 if (cached) {
                     setClarityData(cached.data);
                     const currentHash = await computeBaseHash(inputText, mode);
                     setStoredData({ requestHash: currentHash, result: cached.data });
                     setIsLoading(false);
-                    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
                     return;
                 }
             }
 
             const data = await apiClient<ClarifyOutput>("/api/clarify", request);
-
-            // Success - store
             const currentHash = await computeBaseHash(inputText, mode);
             setStoredData({ requestHash: currentHash, result: data });
             setClarityData(data);
+            setFollowupAnswer("");
 
-            if (isRefining) {
-                setFollowupAnswer(""); // Clear typed answer after successful refinement
-            } else {
-                // If it's a fresh generation, we can clear the old answer if the question changed
-                // Actually, let's always clear it on a fresh Generate
-                setFollowupAnswer("");
-            }
-
-            // Cache base requests
             if (!isRefining) {
                 const cacheKey = await stableHash(request);
                 setCachedResult(cacheKey, data);
             }
-
-            setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-
         } catch (err: any) {
             const apiErr = err as APIError;
             if (apiErr.errorType === "RATE_LIMIT") {
@@ -250,7 +181,6 @@ export default function ClarityPage() {
                 setError(apiErr.message);
             } else {
                 setError(apiErr.message || "Failed to generate clarity assessment");
-                if (apiErr.debug || apiErr.details) setErrorDetails(apiErr.debug || apiErr.details);
             }
         } finally {
             setIsLoading(false);
@@ -258,7 +188,7 @@ export default function ClarityPage() {
     };
 
     const clearSession = () => {
-        if (confirm("Clear current session? This will remove your input and results.")) {
+        if (typeof window !== "undefined" && window.confirm("Clear current session?")) {
             setInputText("");
             setClarityData(null);
             setStoredData(null);
@@ -271,211 +201,198 @@ export default function ClarityPage() {
         if (lastExampleId) {
             available = CLARITY_EXAMPLES.filter(ex => ex.id !== lastExampleId);
         }
-
         const randomExample = available[Math.floor(Math.random() * available.length)];
-
-        // Reset results/errors
         setClarityData(null);
         setStoredData(null);
         setFollowupAnswer("");
         setError(null);
-        setErrorDetails(null);
-
-        // Load example
         setInputText(randomExample.inputText);
         setMode(randomExample.mode);
         setLastExampleId(randomExample.id);
-        setExampleHint(randomExample.label);
     };
 
-    if (!isClient) {
-        return (
-            <div className="min-h-screen p-8 md:p-12 max-w-7xl mx-auto flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full border-2 border-slate-900 border-t-transparent animate-spin"></div>
-            </div>
-        );
-    }
+    if (!isClient) return null;
 
-    return (
-        <div className="min-h-screen p-8 md:p-12 max-w-7xl mx-auto space-y-8">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-                        <span className="w-3 h-8 bg-blue-600 rounded-full"></span>
-                        Clarity Engine
-                    </h1>
-                    <p className="text-slate-500 mt-2">Cut through the noise. Get strategic clarity.</p>
-                </div>
-                <div className="flex gap-4">
-                    <div className="flex flex-col items-end gap-1">
-                        <button
-                            onClick={fillExample}
-                            className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                        >
-                            Use Example
-                        </button>
-                        {exampleHint && (
-                            <span className="text-[10px] text-blue-400 font-medium animate-in fade-in slide-in-from-right-1">
-                                Loaded: {exampleHint}
-                            </span>
-                        )}
-                    </div>
-                    <button
-                        onClick={clearSession}
-                        className="text-sm font-medium text-slate-400 hover:text-red-500 transition-colors"
-                    >
-                        Clear session
-                    </button>
-                </div>
+    const leftContent = (
+        <div className="space-y-6">
+            <header className="flex flex-col gap-2">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+                    <span className="w-2 md:w-3 h-8 bg-blue-600 rounded-full"></span>
+                    Clarity Engine
+                </h1>
+                <p className="text-slate-500 text-sm md:text-base">Cut through the noise. Get strategic clarity.</p>
             </header>
 
-            {/* Rate Limit Banner */}
-            {rateLimitInfo && (
-                <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-xl shadow-sm">
-                    <div className="flex items-start gap-3">
-                        <div className="p-2 bg-amber-100 rounded-lg">
-                            <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+            {/* Inputs in Accordion for Mobile */}
+            <div className="lg:hidden">
+                <CollapsibleSection title="Settings" variant="blue" defaultOpen={!clarityData}>
+                    <div className="space-y-6 pt-2">
+                        {/* Mode Selection */}
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Analysis Mode</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {[
+                                    { id: "decision" as ClarityMode, label: "Decision", icon: "⚖️" },
+                                    { id: "plan" as ClarityMode, label: "Plan", icon: "📋" },
+                                    { id: "overwhelm" as ClarityMode, label: "Overwhelm", icon: "🌊" },
+                                    { id: "message_prep" as ClarityMode, label: "Prep", icon: "🎯" },
+                                ].map((m) => (
+                                    <button
+                                        key={m.id}
+                                        onClick={() => setMode(m.id)}
+                                        className={`p-3 text-left rounded-xl border transition-all ${mode === m.id
+                                            ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-100"
+                                            : "bg-white border-slate-200 text-slate-600 hover:border-blue-300"
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-base">{m.icon}</span>
+                                            <span className="font-bold text-xs uppercase tracking-wider">{m.label}</span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-bold text-amber-900 mb-1">Rate Limit Hit</h3>
-                            <p className="text-amber-800 text-sm">
-                                Gemini free-tier quota reached. Try again in <span className="font-bold text-lg">{rateLimitInfo.countdown}s</span> or enable billing to increase limits.
-                            </p>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your Thoughts</label>
+                                <button onClick={fillExample} className="text-[10px] font-bold text-blue-600 uppercase hover:underline">Use Example</button>
+                            </div>
+                            <textarea
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                placeholder="Unpack your brain here..."
+                                className="w-full h-40 p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none transition-all resize-none text-sm leading-relaxed"
+                            />
                         </div>
                     </div>
-                </div>
-            )}
+                </CollapsibleSection>
+            </div>
 
-            {/* Error Banner */}
-            {error && !rateLimitInfo && (
-                <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl relative overflow-hidden group">
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="font-medium text-sm md:text-base">{error}</span>
-                        </div>
-                        <button
-                            onClick={() => handleGenerate(false)}
-                            className="flex-shrink-0 px-4 py-1.5 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm"
-                        >
-                            Try Again
+            {/* Desktop Inputs (Not collapsed) */}
+            <div className="hidden lg:block space-y-8">
+                <div className="space-y-4">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Analysis Mode</label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {[
+                            { id: "decision" as ClarityMode, label: "Decision", icon: "⚖️", desc: "Compare" },
+                            { id: "plan" as ClarityMode, label: "Plan", icon: "📋", desc: "Execution" },
+                            { id: "overwhelm" as ClarityMode, label: "Overwhelm", icon: "🌊", desc: "Triage" },
+                            { id: "message_prep" as ClarityMode, label: "Prep", icon: "🎯", desc: "Strategy" },
+                        ].map((m) => (
+                            <button
+                                key={m.id}
+                                onClick={() => setMode(m.id)}
+                                className={`p-4 text-left rounded-2xl border transition-all ${mode === m.id
+                                    ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]"
+                                    : "bg-white border-slate-200 text-slate-600 hover:border-blue-300"
+                                    }`}
+                            >
+                                <span className="text-xl block mb-1">{m.icon}</span>
+                                <span className="font-bold text-xs uppercase tracking-wider">{m.label}</span>
+                                <p className={`text-[10px] ${mode === m.id ? "text-blue-100" : "text-slate-400"}`}>{m.desc}</p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your Thoughts</label>
+                        <button onClick={fillExample} className="text-[10px] font-bold text-blue-600 uppercase hover:underline flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            Use Example
                         </button>
                     </div>
-                    {errorDetails && (
-                        <details className="mt-3 text-[10px] md:text-xs">
-                            <summary className="cursor-pointer font-semibold opacity-70 hover:opacity-100 transition-opacity">Technical Details</summary>
-                            <pre className="mt-2 p-3 bg-red-100/50 rounded-lg overflow-x-auto border border-red-200/50">
-                                {JSON.stringify(errorDetails, null, 2)}
-                            </pre>
-                        </details>
-                    )}
+                    <textarea
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder="Unpack your brain here..."
+                        className="w-full h-64 p-5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all resize-none text-base leading-relaxed"
+                    />
                 </div>
-            )}
+            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                <section className="lg:col-span-4 space-y-8">
-                    <div className="space-y-4">
-                        <label className="text-sm font-semibold uppercase tracking-wider text-slate-500">Mode</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {[
-                                { id: "decision" as ClarityMode, label: "Decision", icon: "⚖️", desc: "Compare options" },
-                                { id: "plan" as ClarityMode, label: "Plan", icon: "📋", desc: "Execution steps" },
-                                { id: "overwhelm" as ClarityMode, label: "Overwhelm", icon: "🌊", desc: "Triage & calm" },
-                                { id: "message_prep" as ClarityMode, label: "Prep", icon: "🎯", desc: "Message structure" },
-                            ].map((m) => (
-                                <button
-                                    key={m.id}
-                                    onClick={() => setMode(m.id)}
-                                    className={`p-3 text-left rounded-lg border transition-all ${mode === m.id
-                                        ? "bg-blue-50 border-blue-600 ring-1 ring-blue-600"
-                                        : "bg-white border-slate-200 hover:border-blue-300"
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg">{m.icon}</span>
-                                        <div className={`font-semibold text-sm ${mode === m.id ? "text-blue-900" : "text-slate-900"}`}>
-                                            {m.label}
-                                        </div>
-                                    </div>
-                                    <div className="text-xs text-slate-500 mt-0.5">{m.desc}</div>
-                                </button>
-                            ))}
-                        </div>
+            <div className="space-y-3">
+                {error && (
+                    <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-bold rounded-xl animate-in fade-in slide-in-from-top-1">
+                        {error}
                     </div>
+                )}
+                <button
+                    onClick={() => handleGenerate(false)}
+                    disabled={isLoading || !!rateLimitInfo}
+                    className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-3 active:scale-[0.98]"
+                >
+                    {isLoading ? (
+                        <>
+                            <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            Processing...
+                        </>
+                    ) : rateLimitInfo ? (
+                        `Cooldown: ${rateLimitInfo.countdown}s`
+                    ) : (
+                        clarityData ? "Regenerate Clarity" : "Generate Clarity"
+                    )}
+                </button>
+                {clarityData && (
+                    <button onClick={clearSession} className="w-full py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors">
+                        Reset Session
+                    </button>
+                )}
+            </div>
+        </div>
+    );
 
-                    <div className="space-y-4">
-                        <label className="text-sm font-semibold uppercase tracking-wider text-slate-500">Your Thoughts</label>
-                        <textarea
-                            value={inputText}
-                            onChange={(e) => setInputText(e.target.value)}
-                            placeholder="What's on your mind?"
-                            className="w-full h-48 p-4 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all resize-none text-base"
-                        />
-                    </div>
+    const rightContent = (
+        <div className="space-y-6">
+            {clarityData ? (
+                <>
+                    <ClarityResults data={clarityData} />
 
-                    {clarityData?.one_sharp_question && (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-500">
-                            <label className="text-sm font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                                Refining Question
-                            </label>
-                            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mb-2">
-                                <p className="text-blue-900 font-medium italic text-sm">"{clarityData.one_sharp_question}"</p>
+                    {/* Refining Question Card */}
+                    <div className="p-6 bg-blue-50 border border-blue-200 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-blue-600 text-white p-2 rounded-lg">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
                             </div>
+                            <h3 className="font-bold text-blue-900 text-xs uppercase tracking-wider">Want to go deeper?</h3>
+                        </div>
+                        <p className="text-blue-900 font-medium italic text-sm">&quot;{clarityData.one_sharp_question}&quot;</p>
+                        <div className="space-y-3">
                             <textarea
                                 value={followupAnswer}
                                 onChange={(e) => setFollowupAnswer(e.target.value)}
                                 placeholder="Your answer..."
-                                className="w-full h-24 p-4 bg-white border border-blue-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all resize-none text-sm"
+                                className="w-full h-24 p-4 bg-white border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition-all resize-none text-sm placeholder:text-blue-300"
                             />
                             <button
                                 onClick={() => handleGenerate(true)}
                                 disabled={isLoading || !followupAnswer.trim()}
-                                className="w-full py-2.5 bg-blue-100 text-blue-700 rounded-lg font-bold hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-white text-blue-600 border border-blue-200 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm disabled:opacity-50"
                             >
-                                {isLoading ? "Refining..." : "Use answer to refine"}
+                                {isLoading ? "Refining..." : "Refine Assessment"}
                             </button>
                         </div>
-                    )}
-
-                    <button
-                        onClick={() => handleGenerate(false)}
-                        disabled={isLoading || rateLimitInfo !== null}
-                        className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
-                    >
-                        {isLoading ? (
-                            <>
-                                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                                Generating...
-                            </>
-                        ) : rateLimitInfo ? (
-                            `Retry in ${rateLimitInfo.countdown}s`
-                        ) : (
-                            clarityData ? "Regenerate Clarity" : "Generate Clarity"
-                        )}
-                    </button>
-                </section>
-
-                <section className="lg:col-span-8 space-y-6" ref={resultsRef}>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-                        <label className="text-sm font-semibold uppercase tracking-wider text-slate-500">Results</label>
                     </div>
-
-                    {clarityData ? (
-                        <ClarityResults data={clarityData} />
-                    ) : (
-                        <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                            <div className="w-12 h-12 mb-4 rounded-xl bg-slate-100 flex items-center justify-center text-2xl">💡</div>
-                            <p>Your clarity assessment will appear here</p>
-                        </div>
-                    )}
-                </section>
-            </div>
+                </>
+            ) : (
+                <div className="h-[400px] flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
+                    <div className="w-16 h-16 mb-6 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-3xl shadow-sm">⚡</div>
+                    <h3 className="font-bold text-slate-900 mb-2">Ready for Clarity?</h3>
+                    <p className="text-slate-500 text-sm max-w-xs">Enter your thoughts on the left to generate a strategic breakdown.</p>
+                </div>
+            )}
         </div>
+    );
+
+    return (
+        <ResponsiveLayout
+            leftContent={leftContent}
+            rightContent={rightContent}
+            hasResults={!!clarityData}
+            themeColor="blue"
+        />
     );
 }
