@@ -16,7 +16,7 @@ export interface RequestOptions {
     maxRetries?: number;
 }
 
-const DEFAULT_TIMEOUT = 25000; // 25s
+const DEFAULT_TIMEOUT = 60000; // 60s
 const DEFAULT_RETRIES = 1;
 
 /**
@@ -88,7 +88,7 @@ export async function apiClient<T>(
             }
 
             // Create a structured error for client-side failures
-            const error = new Error(isTimeout ? "Request timed out after 25s." : (err.message || "Network error")) as APIError;
+            const error = new Error(isTimeout ? `Request timed out after ${timeoutMs / 1000}s.` : (err.message || "Network error")) as APIError;
             error.errorType = isTimeout ? "TIMEOUT" : "NETWORK_ERROR";
             error.status = isTimeout ? 408 : 0;
             throw error;

@@ -45,15 +45,26 @@ export default function BrandLogo({ size = "nav", showText = true, variant = "da
                 style={{
                     height: `${current.img}px`,
                     width: 'auto',
-                    mixBlendMode: isLight ? 'screen' : 'multiply',
+                    mixBlendMode: isLight ? 'screen' : (size === 'hero' ? 'normal' : 'multiply'),
                     filter: isLight
                         ? 'invert(1) grayscale(1) brightness(2)'
-                        : 'brightness(1.2) contrast(1.2)'
+                        : size === 'hero'
+                            ? 'sepia(100%) saturate(300%) hue-rotate(190deg) brightness(1.1) contrast(1.1)'
+                            : 'brightness(1.2) contrast(1.2)'
                 }}
-                className="block hover:opacity-90 transition-opacity"
+                className={`block hover:opacity-90 transition-opacity ${size === 'hero'
+                    ? 'drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] drop-shadow-[0_0_40px_rgba(59,130,246,0.4)]'
+                    : ''
+                    }`}
             />
             {showText && (
-                <span className={`font-bold ${current.text} ${isLight ? 'text-white' : 'text-slate-900'} tracking-tight leading-none h-fit`}>
+                <span
+                    className={`font-bold ${current.text} ${isLight ? 'text-white' : 'text-[hsl(var(--brand-blue))]'
+                        } tracking-tight leading-none h-fit ${size === 'hero'
+                            ? 'drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] drop-shadow-[0_0_40px_rgba(59,130,246,0.4)]'
+                            : ''
+                        }`}
+                >
                     ClarityCast
                 </span>
             )}

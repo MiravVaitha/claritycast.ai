@@ -50,15 +50,81 @@ export async function POST(req: Request) {
         const { mode, text, followup_answer } = parseResult.data;
         const userPrompt = buildClarityPrompt(mode, text, followup_answer);
 
-        // Mode-specific repair prompt function
-        const repairPromptFn = (error: string, originalPrompt: string) => {
-            const modeExample = buildClarityPrompt(mode, text, followup_answer);
-            return `Previous JSON generation failed validation.
-Error: ${error}
-
-Rewrite ONLY the JSON to match schema exactly. No extra keys. No markdown.
-
-${modeExample}`;
+        // Native Gemini schemas for each mode
+        const schemas: Record<string, any> = {
+            decision: {
+                type: "object",
+                properties: {
+                    problem_type: { type: "string" },
+                    core_issue: { type: "string" },
+                    options: {
+                        type: "array",
+                        items: {
+                            type: "object",
+                            properties: {
+                                option: { type: "string" },
+                                why: { type: "string" },
+                                when_it_wins: { type: "string" }
+                            },
+                            required: ["option", "why"]
+                        }
+                    },
+                    decision_levers: { type: "array", items: { type: "string" } },
+                    tradeoffs: { type: "array", items: { type: "string" } },
+                    next_steps_14_days: { type: "array", items: { type: "string" } },
+                    one_sharp_question: { type: "string" }
+                },
+                required: ["problem_type", "core_issue", "options", "decision_levers", "tradeoffs", "next_steps_14_days", "one_sharp_question"]
+            },
+            plan: {
+                type: "object",
+                properties: {
+                    problem_type: { type: "string" },
+                    core_issue: { type: "string" },
+                    hidden_assumptions: { type: "array", items: { type: "string" } },
+                    next_steps_14_days: { type: "array", items: { type: "string" } },
+                    tradeoffs: { type: "array", items: { type: "string" } },
+                    decision_levers: { type: "array", items: { type: "string" } },
+                    one_sharp_question: { type: "string" }
+                },
+                required: ["problem_type", "core_issue", "hidden_assumptions", "next_steps_14_days", "tradeoffs", "decision_levers", "one_sharp_question"]
+            },
+            overwhelm: {
+                type: "object",
+                properties: {
+                    problem_type: { type: "string" },
+                    core_issue: { type: "string" },
+                    top_3_priorities_today: { type: "array", items: { type: "string" } },
+                    top_3_defer_or_ignore: { type: "array", items: { type: "string" } },
+                    next_10_minutes: { type: "string" },
+                    next_24_hours: { type: "string" },
+                    constraint_or_boundary: { type: "string" },
+                    one_sharp_question: { type: "string" }
+                },
+                required: ["problem_type", "core_issue", "top_3_priorities_today", "top_3_defer_or_ignore", "next_10_minutes", "next_24_hours", "constraint_or_boundary", "one_sharp_question"]
+            },
+            message_prep: {
+                type: "object",
+                properties: {
+                    problem_type: { type: "string" },
+                    core_issue: { type: "string" },
+                    purpose_outcome: { type: "string" },
+                    key_points: { type: "array", items: { type: "string" } },
+                    structure_outline: {
+                        type: "object",
+                        properties: {
+                            opening: { type: "string" },
+                            body: { type: "array", items: { type: "string" } },
+                            close: { type: "string" }
+                        },
+                        required: ["opening", "body", "close"]
+                    },
+                    likely_questions_or_objections: { type: "array", items: { type: "string" } },
+                    rehearsal_checklist: { type: "array", items: { type: "string" } },
+                    one_sharp_question: { type: "string" }
+                },
+                required: ["problem_type", "core_issue", "purpose_outcome", "key_points", "structure_outline", "likely_questions_or_objections", "rehearsal_checklist", "one_sharp_question"]
+            }
         };
 
         const output = await generateStructuredData(
@@ -66,7 +132,7 @@ ${modeExample}`;
             userPrompt,
             ClarifyOutputSchema,
             `Clarity Assessment (${mode})`,
-            repairPromptFn
+            schemas[mode]
         );
 
         if (DEBUG_AI) {

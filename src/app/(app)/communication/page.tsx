@@ -59,6 +59,54 @@ const COMMUNICATION_EXAMPLES: CommunicationExample[] = [
     },
 ];
 
+const GlassSelect = ({ value, onChange, options, label }: { value: string, onChange: (val: string) => void, options: string[], label?: string }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative w-full h-full" ref={containerRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full h-full px-4 py-3 bg-white/80 border border-white/40 rounded-xl flex items-center justify-between text-sm font-black uppercase tracking-widest text-indigo-950 focus:ring-2 focus:ring-indigo-600 transition-all shadow-sm hover:bg-white/100"
+            >
+                <span className="capitalize">{value}</span>
+                <svg className={`w-4 h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            {isOpen && (
+                <div className="absolute top-full left-0 w-full mt-2 z-50 glass-luminous overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 shadow-2xl">
+                    <div className="py-1">
+                        {options.map((opt) => (
+                            <button
+                                key={opt}
+                                onClick={() => {
+                                    onChange(opt);
+                                    setIsOpen(false);
+                                }}
+                                className={`w-full text-left px-4 py-3 text-sm font-black uppercase tracking-widest transition-colors ${value === opt ? "bg-indigo-600 text-white" : "text-slate-900 hover:bg-indigo-50"}`}
+                            >
+                                {opt}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function CommunicationPage() {
     const [inputText, setInputText] = useLocalStorage<string>("communication_input", "");
     const [contexts, setContexts] = useLocalStorage<ContextType[]>("communication_contexts", []);
@@ -251,7 +299,7 @@ export default function CommunicationPage() {
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                                 placeholder="What do you want to say?"
-                                className="w-full h-32 p-4 bg-white/40 border border-white/20 rounded-2xl focus:ring-2 focus:ring-indigo-600 focus:bg-white/60 outline-none transition-all resize-none text-sm leading-relaxed text-slate-800 placeholder:text-slate-400"
+                                className="w-full h-32 p-4 bg-white/80 border border-white/40 rounded-2xl focus:ring-2 focus:ring-indigo-600 focus:bg-white/100 outline-none transition-all resize-none text-sm leading-relaxed text-slate-950 font-medium placeholder:text-slate-400"
                             />
                         </div>
 
@@ -267,9 +315,9 @@ export default function CommunicationPage() {
                                     <button
                                         key={c.id}
                                         onClick={() => toggleContext(c.id as ContextType)}
-                                        className={`p-3 text-center rounded-xl border transition-all font-bold text-xs uppercase tracking-wider ${contexts.includes(c.id as ContextType)
-                                            ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                                            : "bg-white/40 border-white/20 text-slate-700 hover:bg-white/60"
+                                        className={`p-3 text-center rounded-xl border transition-all font-black text-xs uppercase tracking-widest ${contexts.includes(c.id as ContextType)
+                                            ? "bg-indigo-700 border-indigo-700 text-white shadow-md shadow-indigo-500/20"
+                                            : "bg-white/80 border-white/40 text-slate-900 hover:bg-white/100"
                                             }`}
                                     >
                                         {c.label}
@@ -278,33 +326,36 @@ export default function CommunicationPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Intent & Tuning</label>
-                            <select
-                                value={intent}
-                                onChange={(e) => setIntent(e.target.value)}
-                                className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm font-medium"
-                            >
-                                {["inform", "persuade", "explain", "apologise"].map((i) => (
-                                    <option key={i} value={i} className="capitalize">{i}</option>
-                                ))}
-                            </select>
-                            <div className="flex flex-wrap gap-3 p-3 bg-indigo-50/20 rounded-xl border border-indigo-200/30">
-                                {[
-                                    { key: "preserveMeaning", label: "Faithful" },
-                                    { key: "concise", label: "Concise" },
-                                    { key: "formal", label: "Formal" },
-                                ].map((opt) => (
-                                    <label key={opt.key} className="flex items-center gap-2 cursor-pointer group">
-                                        <input
-                                            type="checkbox"
-                                            checked={(options as any)[opt.key]}
-                                            onChange={() => setOptions(prev => ({ ...prev, [opt.key]: !(prev as any)[opt.key] }))}
-                                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
-                                        />
-                                        <span className="text-[10px] font-bold uppercase text-indigo-900 group-hover:text-indigo-700 transition-colors uppercase tracking-widest">{opt.label}</span>
-                                    </label>
-                                ))}
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Intent</label>
+                                <div className="h-12">
+                                    <GlassSelect
+                                        value={intent}
+                                        onChange={setIntent}
+                                        options={["inform", "persuade", "explain", "apologise"]}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Constraints</label>
+                                <div className="flex flex-wrap gap-2 p-1.5 bg-black/5 rounded-xl border border-white/10">
+                                    {[
+                                        { key: "preserveMeaning", label: "Faithful" },
+                                        { key: "concise", label: "Concise" },
+                                        { key: "formal", label: "Formal" },
+                                    ].map((opt) => (
+                                        <label key={opt.key} className={`flex-1 min-w-[80px] flex items-center justify-center gap-2 cursor-pointer group py-2 px-3 rounded-lg transition-all ${(options as any)[opt.key] ? 'bg-white border border-indigo-400 shadow-md scale-[1.02]' : 'bg-white/10 border border-white/10 hover:bg-white/20'}`}>
+                                            <input
+                                                type="checkbox"
+                                                checked={(options as any)[opt.key]}
+                                                onChange={() => setOptions(prev => ({ ...prev, [opt.key]: !(prev as any)[opt.key] }))}
+                                                className="w-4 h-4 rounded border-indigo-300 text-indigo-700 focus:ring-indigo-700"
+                                            />
+                                            <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${(options as any)[opt.key] ? 'text-indigo-900' : 'text-white group-hover:text-white/80'}`}>{opt.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -325,7 +376,7 @@ export default function CommunicationPage() {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Enter the raw message or thoughts you want to communicate..."
-                        className="w-full p-6 bg-white/50 border-2 border-white/60 rounded-3xl text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all min-h-[300px] font-medium leading-relaxed shadow-sm"
+                        className="w-full p-6 bg-white/80 border-2 border-white/60 rounded-3xl text-slate-950 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white/100 outline-none transition-all min-h-[300px] font-bold text-base md:text-lg leading-relaxed shadow-sm"
                     />
                 </div>
 
@@ -342,45 +393,49 @@ export default function CommunicationPage() {
                                 key={c.id}
                                 onClick={() => toggleContext(c.id as ContextType)}
                                 className={`p-4 text-left rounded-2xl border transition-all ${contexts.includes(c.id as ContextType)
-                                    ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-500/30 scale-[1.02]"
-                                    : "bg-white/40 border-white/20 text-slate-700 hover:bg-white/60 hover:border-white/40"
+                                    ? "bg-indigo-700 border-indigo-700 text-white shadow-xl shadow-indigo-500/30 scale-[1.02]"
+                                    : "bg-white/80 border-white/50 text-slate-950 hover:bg-white/100 hover:border-white/60 shadow-sm"
                                     }`}
                             >
-                                <span className="font-bold text-xs uppercase tracking-wider block">{c.label}</span>
-                                <span className={`text-[10px] ${contexts.includes(c.id as ContextType) ? "text-indigo-100" : "text-slate-500"}`}>{c.desc}</span>
+                                <span className="font-black text-xs uppercase tracking-widest block">{c.label}</span>
+                                <span className={`text-[10px] font-bold ${contexts.includes(c.id as ContextType) ? "text-indigo-100" : "text-slate-600"}`}>{c.desc}</span>
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div className="space-y-4 pt-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Intent & Constraints</label>
-                    <div className="flex gap-4">
-                        <select
-                            value={intent}
-                            onChange={(e) => setIntent(e.target.value)}
-                            className="flex-1 p-3 bg-white/40 border border-white/20 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm font-bold uppercase tracking-wider text-slate-800"
-                        >
-                            {["inform", "persuade", "explain", "apologise"].map((i) => (
-                                <option key={i} value={i} className="capitalize">{i}</option>
-                            ))}
-                        </select>
-                        <div className="flex items-center gap-4 px-4 bg-indigo-50/20 border border-indigo-200/30 rounded-xl">
-                            {[
-                                { key: "preserveMeaning", label: "Preserve meaning" },
-                                { key: "concise", label: "Concise" },
-                                { key: "formal", label: "Formal" },
-                            ].map((opt) => (
-                                <label key={opt.key} className="flex items-center gap-2 cursor-pointer group">
-                                    <input
-                                        type="checkbox"
-                                        checked={(options as any)[opt.key]}
-                                        onChange={() => setOptions(prev => ({ ...prev, [opt.key]: !(prev as any)[opt.key] }))}
-                                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
-                                    />
-                                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest group-hover:text-slate-900 transition-colors">{opt.label}</span>
-                                </label>
-                            ))}
+                <div className="space-y-6 pt-2">
+                    <div className="grid grid-cols-1 gap-6">
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Intent</label>
+                            <div className="h-12 w-full max-w-sm">
+                                <GlassSelect
+                                    value={intent}
+                                    onChange={setIntent}
+                                    options={["inform", "persuade", "explain", "apologise"]}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-on-bg-muted">Constraints</label>
+                            <div className="flex items-center gap-3 p-2 bg-white/5 rounded-2xl border border-white/10 w-full">
+                                {[
+                                    { key: "preserveMeaning", label: "Preserve meaning" },
+                                    { key: "concise", label: "Concise" },
+                                    { key: "formal", label: "Formal" },
+                                ].map((opt) => (
+                                    <label key={opt.key} className={`flex-1 flex items-center justify-center gap-3 cursor-pointer group py-3 px-4 rounded-xl transition-all ${(options as any)[opt.key] ? 'bg-white border border-indigo-400 shadow-lg scale-[1.02]' : 'bg-white/10 border border-white/10 hover:bg-white/20'}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={(options as any)[opt.key]}
+                                            onChange={() => setOptions(prev => ({ ...prev, [opt.key]: !(prev as any)[opt.key] }))}
+                                            className="w-4 h-4 rounded border-indigo-300 text-indigo-700 focus:ring-indigo-700"
+                                        />
+                                        <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${(options as any)[opt.key] ? 'text-indigo-950' : 'text-white group-hover:text-white/80'}`}>{opt.label}</span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -438,12 +493,12 @@ export default function CommunicationPage() {
                     </div>
 
                     {/* Refining Question Card */}
-                    <div className="p-6 glass-light !bg-indigo-50/90 !border-indigo-400/30 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="p-6 glass-light !bg-indigo-50 !border-indigo-400/40 rounded-2xl shadow-md space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-sm shadow-md shadow-indigo-500/20">✨</div>
-                            <h3 className="font-bold text-indigo-950 uppercase tracking-widest text-[10px]">Help me refine</h3>
+                            <div className="w-8 h-8 bg-indigo-700 text-white rounded-lg flex items-center justify-center text-sm shadow-md shadow-indigo-500/20">✨</div>
+                            <h3 className="font-black text-indigo-950 uppercase tracking-widest text-[10px]">Help me refine</h3>
                         </div>
-                        <p className="text-sm font-bold text-indigo-900 leading-relaxed italic">
+                        <p className="text-base font-black text-indigo-950 leading-relaxed italic">
                             &quot;{draftsData.refining_question}&quot;
                         </p>
                         <div className="space-y-3">
@@ -451,12 +506,12 @@ export default function CommunicationPage() {
                                 value={refiningAnswer}
                                 onChange={(e) => setRefiningAnswer(e.target.value)}
                                 placeholder="Answer this question or add more context..."
-                                className="w-full p-4 bg-white/50 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-blue-400/60 min-h-[100px] text-blue-950 font-medium"
+                                className="w-full p-4 bg-white border-2 border-indigo-200 rounded-xl text-base focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-indigo-400/60 min-h-[100px] text-indigo-950 font-bold"
                             />
                             <button
                                 onClick={() => handleGenerate(true)}
                                 disabled={isLoading || !refiningAnswer.trim()}
-                                className="w-full py-3 bg-white text-indigo-600 border border-indigo-200/50 rounded-xl font-bold hover:bg-indigo-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm disabled:opacity-50 active:scale-95"
+                                className="w-full py-3 bg-indigo-600 text-white border border-indigo-700 rounded-xl font-black hover:bg-indigo-700 transition-all text-xs uppercase tracking-widest shadow-md disabled:bg-slate-300 disabled:opacity-50 active:scale-95"
                             >
                                 {isLoading ? "Refining..." : "Update Drafts"}
                             </button>

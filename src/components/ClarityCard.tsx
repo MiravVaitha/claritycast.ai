@@ -49,11 +49,11 @@ export default function ClarityResults({ data }: Props) {
                     </svg>
                 }
             >
-                <p className="font-medium text-base md:text-lg leading-relaxed">
+                <p className="font-bold text-base md:text-xl leading-relaxed text-slate-900">
                     {isPrep ? purpose : core_issue}
                 </p>
                 {constraint && (
-                    <div className="mt-4 p-3 bg-white/40 rounded-xl border border-amber-200 text-amber-900 text-sm italic">
+                    <div className="mt-4 p-4 bg-white/60 rounded-xl border border-amber-300 text-amber-950 text-sm italic font-medium">
                         <span className="font-bold not-italic">Constraint: </span> {constraint}
                     </div>
                 )}
@@ -73,22 +73,22 @@ export default function ClarityResults({ data }: Props) {
                     badge={`${top_3_priorities.length} items`}
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 bg-white/50 rounded-xl border border-amber-100">
-                            <h4 className="font-bold text-amber-900 mb-3 text-xs uppercase tracking-wider">High Priority</h4>
+                        <div className="p-4 bg-white/60 rounded-xl border border-amber-200 shadow-sm">
+                            <h4 className="font-black text-amber-900 mb-3 text-xs uppercase tracking-widest border-b border-amber-200 pb-1">High Priority</h4>
                             <ul className="space-y-2">
                                 {top_3_priorities.map((item, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                                        <span className="text-amber-500 font-bold">•</span> {item}
+                                    <li key={i} className="flex items-start gap-2 text-sm text-slate-900 font-bold">
+                                        <span className="text-amber-600 font-black">•</span> {item}
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                        <div className="p-4 bg-white/30 rounded-xl border border-amber-100/50">
-                            <h4 className="font-bold text-amber-800/60 mb-3 text-xs uppercase tracking-wider">Defer / Ignore</h4>
+                        <div className="p-4 bg-white/40 rounded-xl border border-amber-200/50">
+                            <h4 className="font-bold text-amber-900/40 mb-3 text-xs uppercase tracking-widest border-b border-amber-100 pb-1">Defer / Ignore</h4>
                             <ul className="space-y-2">
                                 {top_3_defer.map((item, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-sm text-slate-500">
-                                        <span className="text-slate-300">•</span> {item}
+                                    <li key={i} className="flex items-start gap-2 text-sm text-slate-800 italic opacity-80 font-medium">
+                                        <span className="text-slate-400">•</span> {item}
                                     </li>
                                 ))}
                             </ul>
@@ -110,25 +110,28 @@ export default function ClarityResults({ data }: Props) {
                     }
                 >
                     <div className="space-y-4">
-                        <div className="pl-4 border-l-2 border-purple-200">
-                            <span className="text-[10px] font-bold text-purple-600 uppercase tracking-widest">Opening</span>
-                            <p className="text-slate-700 text-sm mt-1">{structure.opening}</p>
+                        <div className="p-4 bg-white/60 rounded-xl border-l-4 border-purple-500 shadow-sm">
+                            <span className="text-[10px] font-black text-purple-700 uppercase tracking-widest border-b border-purple-100 pb-1 block mb-2">Opening</span>
+                            <p className="text-slate-900 text-sm font-bold">{structure.opening}</p>
                         </div>
-                        <div className="pl-4 border-l-2 border-purple-400">
-                            <span className="text-[10px] font-bold text-purple-700 uppercase tracking-widest">Body</span>
+                        <div className="p-4 bg-white/70 rounded-xl border-l-4 border-purple-700 shadow-sm">
+                            <span className="text-[10px] font-black text-purple-900 uppercase tracking-widest border-b border-purple-200 pb-1 block mb-2">Body</span>
                             {Array.isArray(structure.body) ? (
-                                <ul className="space-y-1 mt-1">
+                                <ul className="space-y-2 mt-1">
                                     {structure.body.map((point, i) => (
-                                        <li key={i} className="text-slate-700 text-sm">• {point}</li>
+                                        <li key={i} className="text-slate-900 text-sm font-bold flex items-start gap-2">
+                                            <span className="text-purple-600 mt-1">•</span>
+                                            {point}
+                                        </li>
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-slate-700 text-sm mt-1">{structure.body}</p>
+                                <p className="text-slate-900 text-sm font-bold">{structure.body}</p>
                             )}
                         </div>
-                        <div className="pl-4 border-l-2 border-purple-600">
-                            <span className="text-[10px] font-bold text-purple-800 uppercase tracking-widest">Closing</span>
-                            <p className="text-slate-700 text-sm mt-1">{structure.close}</p>
+                        <div className="p-4 bg-white/80 rounded-xl border-l-4 border-purple-900 shadow-sm">
+                            <span className="text-[10px] font-black text-purple-950 uppercase tracking-widest border-b border-purple-300 pb-1 block mb-2">Closing</span>
+                            <p className="text-slate-950 text-base font-black">{structure.close}</p>
                         </div>
                     </div>
                 </CollapsibleSection>
@@ -168,10 +171,10 @@ export default function ClarityResults({ data }: Props) {
                         </svg>
                     }
                 >
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                         {(isPrep ? objections : tradeoffs).map((item, i) => (
-                            <li key={i} className="text-slate-600 text-sm flex items-start gap-2">
-                                <span className="text-slate-400 mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-200 flex-shrink-0"></span> {item}
+                            <li key={i} className="text-slate-900 text-sm flex items-start gap-3 p-2 bg-white/20 rounded-lg">
+                                <span className="text-slate-500 mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0"></span> {item}
                             </li>
                         ))}
                     </ul>
@@ -193,11 +196,11 @@ export default function ClarityResults({ data }: Props) {
                 >
                     <div className="grid grid-cols-1 gap-3">
                         {options.map((opt, i) => (
-                            <div key={i} className="p-4 bg-white/50 border border-blue-100 rounded-xl border-l-4 border-l-blue-600 shadow-sm">
-                                <div className="font-bold text-base text-slate-900 mb-1">{opt.option || "Option"}</div>
-                                <p className="text-slate-600 text-sm mb-2 leading-relaxed">{opt.why || ""}</p>
+                            <div key={i} className="p-5 bg-white/70 border border-blue-200 rounded-xl border-l-4 border-l-blue-700 shadow-md">
+                                <div className="font-black text-base text-slate-950 mb-1">{opt.option || "Option"}</div>
+                                <p className="text-slate-900 text-sm mb-3 leading-relaxed font-bold">{opt.why || ""}</p>
                                 {opt.when_it_wins && (
-                                    <div className="inline-flex px-2 py-0.5 bg-green-100 text-green-800 text-[10px] font-bold rounded uppercase">
+                                    <div className="inline-flex px-3 py-1 bg-green-200 text-green-900 text-[10px] font-black rounded uppercase tracking-wider">
                                         Wins when: {opt.when_it_wins}
                                     </div>
                                 )}
@@ -221,7 +224,7 @@ export default function ClarityResults({ data }: Props) {
                 >
                     <div className="flex flex-wrap gap-2">
                         {decision_levers.map((item, i) => (
-                            <span key={i} className="px-3 py-1 bg-white border border-indigo-200 text-indigo-700 rounded-full text-xs font-bold shadow-sm">
+                            <span key={i} className="px-4 py-1.5 bg-white border-2 border-indigo-300 text-indigo-950 rounded-full text-xs font-black shadow-sm">
                                 {item}
                             </span>
                         ))}
@@ -243,20 +246,20 @@ export default function ClarityResults({ data }: Props) {
                 >
                     <div className="space-y-3">
                         {next_10_min && (
-                            <div className="p-4 bg-white/50 rounded-xl border border-rose-100 flex items-center gap-4">
-                                <span className="text-2xl">⚡</span>
+                            <div className="p-5 bg-white/70 rounded-xl border-2 border-rose-300 flex items-center gap-4 shadow-md">
+                                <span className="text-2xl drop-shadow-sm">⚡</span>
                                 <div>
-                                    <h4 className="font-bold text-rose-900 text-[10px] uppercase tracking-wider">Next 10 Minutes</h4>
-                                    <p className="text-rose-900 font-bold text-base">{next_10_min}</p>
+                                    <h4 className="font-black text-rose-950 text-[10px] uppercase tracking-widest border-b border-rose-100 mb-1">Next 10 Minutes</h4>
+                                    <p className="text-rose-950 font-black text-lg md:text-xl">{next_10_min}</p>
                                 </div>
                             </div>
                         )}
                         {next_24_hr && (
-                            <div className="p-4 bg-white/30 rounded-xl border border-rose-100/50 flex items-center gap-4">
-                                <span className="text-2xl">📅</span>
+                            <div className="p-5 bg-white/50 rounded-xl border border-rose-200 flex items-center gap-4">
+                                <span className="text-2xl opacity-80">📅</span>
                                 <div>
-                                    <h4 className="font-bold text-rose-800/60 text-[10px] uppercase tracking-wider">Next 24 Hours</h4>
-                                    <p className="text-slate-700 font-medium text-sm">{next_24_hr}</p>
+                                    <h4 className="font-bold text-rose-900 text-[10px] uppercase tracking-widest mb-1">Next 24 Hours</h4>
+                                    <p className="text-slate-950 font-bold text-base leading-relaxed">{next_24_hr}</p>
                                 </div>
                             </div>
                         )}
@@ -275,11 +278,11 @@ export default function ClarityResults({ data }: Props) {
                         }
                         badge={`${next_steps.length} steps`}
                     >
-                        <ul className="space-y-3">
+                        <ul className="space-y-3 p-2">
                             {next_steps.map((step, i) => (
-                                <li key={i} className="flex items-start gap-3">
-                                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-200 text-green-700 font-bold text-[10px] flex items-center justify-center mt-0.5">{i + 1}</span>
-                                    <span className="text-slate-700 text-sm font-medium leading-relaxed">{step}</span>
+                                <li key={i} className="flex items-start gap-4 p-3 bg-white/40 rounded-xl border border-green-200/50 shadow-sm">
+                                    <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-green-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-sm">{i + 1}</span>
+                                    <span className="text-slate-950 text-base font-bold leading-relaxed">{step}</span>
                                 </li>
                             ))}
                         </ul>

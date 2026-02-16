@@ -41,17 +41,27 @@ export async function POST(req: Request) {
         const { message, contexts, intent, options, refiningAnswer } = parseResult.data;
         const userPrompt = buildCommunicatePrompt(message, contexts, intent, options, refiningAnswer);
 
-        // Repair prompt function for Communication
-        const repairPromptFn = (error: string, originalPrompt: string) => {
-            return `Previous JSON generation failed validation.
-Error: ${error}
-
-Rewrite ONLY the JSON to match schema exactly. No extra keys. No markdown.
-You must generate exactly ${contexts.length > 1 ? contexts.length + 1 : contexts.length} drafts (one for each context: ${contexts.join(", ")}${contexts.length > 1 ? " plus one combined draft" : ""}).
-Each draft must have: context, intent, draft, key_changes (array of 2-5 strings), tone.
-You must also include a refining_question (string).
-
-${originalPrompt}`;
+        // Native Gemini schema for Communication
+        const responseSchema = {
+            type: "object",
+            properties: {
+                drafts: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            context: { type: "string" },
+                            intent: { type: "string" },
+                            draft: { type: "string" },
+                            key_changes: { type: "array", items: { type: "string" } },
+                            tone: { type: "string" }
+                        },
+                        required: ["context", "intent", "draft", "key_changes", "tone"]
+                    }
+                },
+                refining_question: { type: "string" }
+            },
+            required: ["drafts", "refining_question"]
         };
 
         const output = await generateStructuredData(
@@ -59,7 +69,7 @@ ${originalPrompt}`;
             userPrompt,
             CommunicateOutputSchema,
             "Communication Drafts",
-            repairPromptFn
+            responseSchema
         );
 
         if (DEBUG_AI) {

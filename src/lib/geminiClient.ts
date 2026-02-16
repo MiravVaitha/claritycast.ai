@@ -103,44 +103,20 @@ export async function generateStructuredData<T>(
     userPrompt: string,
     schema: z.ZodType<T>,
     schemaName: string = "Data",
-    repairPromptFn?: (error: string, originalPrompt: string) => string
+    responseSchema?: any // Native Gemini JSON schema
 ): Promise<T> {
     const ai = getGenAI();
     const model = MODEL_NAME;
 
-    // First attempt
     try {
-        const result = await executeGeneration(ai, model, userPrompt, systemPrompt);
+        const result = await executeGeneration(ai, model, userPrompt, systemPrompt, responseSchema);
         return validateAndParse(result, schema, schemaName);
     } catch (error: any) {
         if (DEBUG_AI) {
-            console.log(`\n[DEBUG_AI] First attempt failed for ${schemaName}`);
-            console.log(`Error: ${error.message}`);
+            console.error(`\n[DEBUG_AI] Generation failed for ${schemaName}`);
+            console.error(`Error: ${error.message}`);
         }
-
-        // Retry logic with custom repair prompt if provided
-        try {
-            const retryPrompt = repairPromptFn
-                ? repairPromptFn(error.message, userPrompt)
-                : `Previous attempt to generate JSON failed validation.
-Error: ${error.message}
-
-Rewrite ONLY the JSON to match schema exactly. No extra keys. No markdown.
-${userPrompt}`;
-
-            if (DEBUG_AI) {
-                console.log(`\n[DEBUG_AI] Retrying with repair prompt...`);
-            }
-
-            const result = await executeGeneration(ai, model, retryPrompt, systemPrompt);
-            return validateAndParse(result, schema, schemaName);
-        } catch (retryError: any) {
-            if (DEBUG_AI) {
-                console.error(`\n[DEBUG_AI] Retry failed for ${schemaName}`);
-                console.error(`Error: ${retryError.message}`);
-            }
-            throw retryError; // Throw the detailed error, not a generic message
-        }
+        throw error;
     }
 }
 
@@ -155,7 +131,6 @@ function validateAndParse<T>(json: any, schema: z.ZodType<T>, schemaName: string
             console.log(`Zod errors:`, parseResult.error.issues);
         }
 
-        // Create detailed error with issues attached
         const error: any = new Error(`Schema validation failed: ${errorMsg}`);
         error.zodIssues = parseResult.error.issues;
         error.rawData = json;
@@ -164,19 +139,28 @@ function validateAndParse<T>(json: any, schema: z.ZodType<T>, schemaName: string
     return parseResult.data;
 }
 
-async function executeGeneration(ai: GoogleGenAI, model: string, prompt: string, systemPrompt: string) {
-    const finalSystemPrompt = `${systemPrompt}\n\nCRITICAL: Output ONLY valid JSON. Do NOT wrap in markdown code blocks. Do NOT add any commentary.`;
+async function executeGeneration(ai: GoogleGenAI, model: string, prompt: string, systemPrompt: string, responseSchema?: any) {
+    const finalSystemPrompt = `${systemPrompt}\n\nCRITICAL: Output ONLY valid JSON.`;
+
+    // Server-side deterministic timeout (50s)
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("AI generation timed out on server (50s)")), 50000);
+    });
 
     try {
-        const response: any = await ai.models.generateContent({
+        const generatePromise = (ai as any).models.generateContent({
             model,
             contents: [{ role: "user", parts: [{ text: `${finalSystemPrompt}\n\n${prompt}` }] }],
             config: {
                 responseMimeType: "application/json",
-            },
+                responseSchema: responseSchema
+            }
         });
 
-        const candidates = response.candidates || response.data?.candidates;
+        const result: any = await Promise.race([generatePromise, timeoutPromise]);
+
+        // For @google/genai client (v1 SDK)
+        const candidates = result.candidates || result.data?.candidates;
         const text = candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!text) {

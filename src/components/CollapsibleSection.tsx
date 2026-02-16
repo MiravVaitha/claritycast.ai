@@ -23,22 +23,22 @@ export default function CollapsibleSection({
 
     const variants = {
         default: "glass-light",
-        amber: "glass-light !bg-amber-50/80 !border-amber-400/30 text-amber-900 shadow-sm",
-        blue: "glass-light !bg-blue-50/80 !border-blue-400/30 text-blue-900 shadow-sm",
-        indigo: "glass-light !bg-indigo-50/80 !border-indigo-400/30 text-indigo-900 shadow-sm",
-        rose: "glass-light !bg-rose-50/80 !border-rose-400/30 text-rose-900 shadow-sm",
-        green: "glass-light !bg-green-50/80 !border-green-400/30 text-green-900 shadow-sm",
-        purple: "glass-light !bg-purple-50/80 !border-purple-400/30 text-purple-900 shadow-sm",
+        amber: "glass-light !bg-amber-50/95 !border-amber-400/40 text-amber-950 shadow-sm",
+        blue: "glass-light !bg-blue-50/95 !border-blue-400/40 text-blue-950 shadow-sm",
+        indigo: "glass-light !bg-indigo-50/95 !border-indigo-400/40 text-indigo-950 shadow-sm",
+        rose: "glass-light !bg-rose-50/95 !border-rose-400/40 text-rose-950 shadow-sm",
+        green: "glass-light !bg-green-50/95 !border-green-400/40 text-green-950 shadow-sm",
+        purple: "glass-light !bg-purple-50/95 !border-purple-400/40 text-purple-950 shadow-sm",
     };
 
     const iconColors = {
-        default: "text-slate-500",
-        amber: "text-amber-700",
-        blue: "text-blue-700",
-        indigo: "text-indigo-700",
-        rose: "text-rose-700",
-        green: "text-green-700",
-        purple: "text-purple-700",
+        default: "text-slate-600",
+        amber: "text-amber-800",
+        blue: "text-blue-800",
+        indigo: "text-indigo-800",
+        rose: "text-rose-800",
+        green: "text-green-800",
+        purple: "text-purple-800",
     };
 
     return (

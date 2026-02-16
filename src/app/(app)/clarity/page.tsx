@@ -242,7 +242,7 @@ export default function ClarityPage() {
                                         onClick={() => setMode(m.id)}
                                         className={`p-3 text-left rounded-xl border transition-all ${mode === m.id
                                             ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20"
-                                            : "bg-white/40 border-white/20 text-slate-700 hover:bg-white/60"
+                                            : "bg-white/80 border-white/40 text-slate-900 hover:bg-white/100"
                                             }`}
                                     >
                                         <div className="flex items-center gap-2">
@@ -263,7 +263,7 @@ export default function ClarityPage() {
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                                 placeholder="Unpack your brain here..."
-                                className="w-full h-40 p-4 bg-white/40 border border-white/20 rounded-2xl focus:ring-2 focus:ring-blue-600 focus:bg-white/60 outline-none transition-all resize-none text-sm leading-relaxed text-slate-800 placeholder:text-slate-400"
+                                className="w-full h-40 p-4 bg-white/80 border border-white/40 rounded-2xl focus:ring-2 focus:ring-blue-600 focus:bg-white/100 outline-none transition-all resize-none text-sm leading-relaxed text-slate-950 font-medium placeholder:text-slate-400"
                             />
                         </div>
                     </div>
@@ -286,12 +286,12 @@ export default function ClarityPage() {
                                 onClick={() => setMode(m.id)}
                                 className={`p-4 text-left rounded-2xl border transition-all ${mode === m.id
                                     ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-500/30 scale-[1.02]"
-                                    : "bg-white/40 border-white/20 text-slate-700 hover:bg-white/60 hover:border-white/40"
+                                    : "bg-white/80 border-white/40 text-slate-900 hover:bg-white/100 hover:border-white/60"
                                     }`}
                             >
                                 <span className="text-xl block mb-1">{m.icon}</span>
-                                <span className="font-bold text-xs uppercase tracking-wider">{m.label}</span>
-                                <p className={`text-[10px] ${mode === m.id ? "text-blue-100" : "text-slate-500"}`}>{m.desc}</p>
+                                <span className="font-black text-xs uppercase tracking-widest">{m.label}</span>
+                                <p className={`text-[10px] font-bold ${mode === m.id ? "text-blue-100" : "text-slate-600"}`}>{m.desc}</p>
                             </button>
                         ))}
                     </div>
@@ -309,7 +309,7 @@ export default function ClarityPage() {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Unpack your brain here..."
-                        className="w-full h-64 p-5 bg-white/40 border border-white/20 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 focus:bg-white/60 outline-none transition-all resize-none text-base leading-relaxed text-slate-800 placeholder:text-slate-400"
+                        className="w-full h-64 p-5 bg-white/80 border border-white/40 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 focus:bg-white/100 outline-none transition-all resize-none text-base leading-relaxed text-slate-950 font-medium placeholder:text-slate-400"
                     />
                 </div>
             </div>
@@ -362,12 +362,12 @@ export default function ClarityPage() {
                     <ClarityResults key={storedData?.requestHash} data={clarityData} />
 
                     {/* Refining Question Card */}
-                    <div className="p-6 glass-light !bg-blue-50/90 !border-blue-400/30 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="p-6 glass-light !bg-blue-50 !border-blue-400/40 rounded-2xl shadow-md space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-sm shadow-md shadow-blue-500/20">🔍</div>
-                            <h3 className="font-bold text-blue-950 uppercase tracking-widest text-[10px]">Want to go deeper?</h3>
+                            <div className="w-8 h-8 bg-blue-700 text-white rounded-lg flex items-center justify-center text-sm shadow-md shadow-blue-500/20">🔍</div>
+                            <h3 className="font-black text-blue-950 uppercase tracking-widest text-[10px]">Want to go deeper?</h3>
                         </div>
-                        <p className="text-sm font-bold text-blue-900 leading-relaxed italic">
+                        <p className="text-base font-black text-blue-950 leading-relaxed italic">
                             &quot;{clarityData.one_sharp_question}&quot;
                         </p>
                         <div className="space-y-3">
@@ -375,12 +375,12 @@ export default function ClarityPage() {
                                 value={followupAnswer}
                                 onChange={(e) => setFollowupAnswer(e.target.value)}
                                 placeholder="Answer this question or add more context..."
-                                className="w-full p-4 bg-white/50 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-blue-300 min-h-[100px] text-blue-950 font-medium"
+                                className="w-full p-4 bg-white border-2 border-blue-200 rounded-xl text-base focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-blue-400 text-blue-950 font-bold"
                             />
                             <button
                                 onClick={() => handleGenerate(true)}
                                 disabled={isLoading || !followupAnswer.trim()}
-                                className="w-full py-3 bg-white text-blue-600 border border-blue-200/50 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm disabled:opacity-50 active:scale-95"
+                                className="w-full py-3 bg-blue-600 text-white border border-blue-700 rounded-xl font-black hover:bg-blue-700 transition-all text-xs uppercase tracking-widest shadow-md disabled:bg-slate-300 disabled:opacity-50 active:scale-95"
                             >
                                 {isLoading ? "Refining..." : "Refine Assessment"}
                             </button>

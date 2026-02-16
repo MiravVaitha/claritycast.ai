@@ -40,7 +40,7 @@ export default function ResponsiveLayout({
         <div className="flex flex-col min-h-[calc(100vh-64px)]">
             {/* Mobile Tab Switcher */}
             {isMobile && (
-                <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200 p-2 flex gap-2">
+                <div className="sticky top-0 z-10 bg-white border-b border-slate-200 p-2 flex gap-2 shadow-sm">
                     <button
                         onClick={() => setActiveTab("input")}
                         className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === "input"

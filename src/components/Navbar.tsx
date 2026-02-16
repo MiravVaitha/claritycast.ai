@@ -20,22 +20,45 @@ export default function Navbar() {
         router.push("/");
     };
 
-    if (pathname === "/") return null;
+    // Determine theme based on route
+    const isDarkTheme = pathname === "/clarity" || pathname === "/communication";
+    const navClass = isDarkTheme
+        ? "glass-dark-nav !shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+        : "glass-luminous !shadow-[0_20px_50px_rgba(31,38,135,0.1)]";
+
+    const brandVariant = isDarkTheme ? "light" : "dark";
+    const textBaseClass = isDarkTheme ? "text-white/90 hover:text-white" : "text-slate-600 hover:text-slate-900";
+    const activeTextClass = isDarkTheme ? "text-white font-black" : "text-slate-950 font-black";
+    const underlineClass = isDarkTheme ? "decoration-white/50" : "decoration-blue-500/30";
 
     return (
         <nav className="sticky top-0 z-50 px-4 py-4 md:px-8">
-            <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16 glass-luminous !shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
-                <BrandLogo size="nav" variant="light" />
+            <div className={`max-w-7xl mx-auto flex items-center justify-between px-6 h-16 ${navClass} transition-all duration-500`}>
+                <BrandLogo size="nav" variant={brandVariant} />
 
                 <div className="hidden md:flex items-center gap-8">
-                    <Link href="/home" className={`text-sm font-bold transition-all hover:scale-105 ${pathname === '/home' ? 'text-slate-900 underline decoration-blue-500/30 underline-offset-4' : 'text-slate-600/90 hover:text-slate-900'}`}>Home</Link>
-                    <Link href="/clarity" className={`text-sm font-bold transition-all hover:scale-105 ${pathname === '/clarity' ? 'text-slate-900 underline decoration-blue-500/30 underline-offset-4' : 'text-slate-600/90 hover:text-slate-900'}`}>Clarity</Link>
-                    <Link href="/communication" className={`text-sm font-bold transition-all hover:scale-105 ${pathname === '/communication' ? 'text-slate-900 underline decoration-blue-500/30 underline-offset-4' : 'text-slate-600/90 hover:text-slate-900'}`}>Communication</Link>
+                    {[
+                        { label: "Home", href: "/home" },
+                        { label: "Clarity", href: "/clarity" },
+                        { label: "Communication", href: "/communication" },
+                    ].map((item) => (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`text-sm tracking-tight transition-all hover:scale-105 ${pathname === item.href
+                                    ? `${activeTextClass} underline ${underlineClass} underline-offset-4`
+                                    : textBaseClass
+                                }`}
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
                 </div>
 
                 <button
                     onClick={handleLogout}
-                    className="text-sm font-bold text-slate-600 hover:text-red-500 transition-all hover:scale-105"
+                    className={`text-sm font-bold transition-all hover:scale-105 ${isDarkTheme ? "text-white/70 hover:text-red-400" : "text-slate-600 hover:text-red-500"
+                        }`}
                 >
                     Logout
                 </button>
