@@ -25,7 +25,7 @@ export default function Home() {
     return (
         <div className="min-h-screen">
             {/* Hero Section */}
-            <section className="py-20 px-8 text-center border-b border-slate-100 flex flex-col items-center">
+            <section className="py-20 px-8 text-center flex flex-col items-center">
                 <div className="mb-8 flex justify-center">
                     <BrandLogo size="hero" variant="light" />
                 </div>
@@ -79,7 +79,7 @@ export default function Home() {
             </section>
 
             {/* Quick Start Examples */}
-            <section className="py-20 border-t border-white/10">
+            <section className="py-20">
                 <div className="max-w-7xl mx-auto px-8">
                     <h2 className="text-3xl font-bold text-on-bg-heading mb-12 text-center uppercase tracking-widest text-sm font-bold">Jump Right In</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -22,27 +22,27 @@ export default function CollapsibleSection({
     const [isOpen, setIsOpen] = useState(defaultOpen);
 
     const variants = {
-        default: "bg-white/40 backdrop-blur-xl border-white/20 text-slate-900 shadow-sm",
-        amber: "bg-amber-400/10 backdrop-blur-xl border-amber-400/20 text-amber-900 shadow-sm",
-        blue: "bg-blue-400/10 backdrop-blur-xl border-blue-400/20 text-blue-900 shadow-sm",
-        indigo: "bg-indigo-400/10 backdrop-blur-xl border-indigo-400/20 text-indigo-900 shadow-sm",
-        rose: "bg-rose-400/10 backdrop-blur-xl border-rose-400/20 text-rose-900 shadow-sm",
-        green: "bg-green-400/10 backdrop-blur-xl border-green-400/20 text-green-900 shadow-sm",
-        purple: "bg-purple-400/10 backdrop-blur-xl border-purple-400/20 text-purple-900 shadow-sm",
+        default: "glass-light",
+        amber: "glass-light !bg-amber-50/80 !border-amber-400/30 text-amber-900 shadow-sm",
+        blue: "glass-light !bg-blue-50/80 !border-blue-400/30 text-blue-900 shadow-sm",
+        indigo: "glass-light !bg-indigo-50/80 !border-indigo-400/30 text-indigo-900 shadow-sm",
+        rose: "glass-light !bg-rose-50/80 !border-rose-400/30 text-rose-900 shadow-sm",
+        green: "glass-light !bg-green-50/80 !border-green-400/30 text-green-900 shadow-sm",
+        purple: "glass-light !bg-purple-50/80 !border-purple-400/30 text-purple-900 shadow-sm",
     };
 
     const iconColors = {
-        default: "text-slate-400",
-        amber: "text-amber-600",
-        blue: "text-blue-600",
-        indigo: "text-indigo-600",
-        rose: "text-rose-600",
-        green: "text-green-600",
-        purple: "text-purple-600",
+        default: "text-slate-500",
+        amber: "text-amber-700",
+        blue: "text-blue-700",
+        indigo: "text-indigo-700",
+        rose: "text-rose-700",
+        green: "text-green-700",
+        purple: "text-purple-700",
     };
 
     return (
-        <div className={`border rounded-2xl overflow-hidden transition-all duration-300 ${variants[variant]}`}>
+        <div className={`overflow-hidden transition-all duration-300 ${variants[variant]}`}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between p-4 md:p-5 text-left transition-colors hover:bg-black/5"

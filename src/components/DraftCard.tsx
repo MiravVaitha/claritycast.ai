@@ -48,15 +48,15 @@ export default function DraftCard({ draft, defaultOpen = true }: Props) {
                     }`}>
                     {draft.context}
                 </span>
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest border-l border-slate-300 pl-3">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-widest border-l border-slate-300 pl-3">
                     {draft.intent}
                 </span>
                 <div className="ml-auto flex items-center gap-3">
-                    <div className="text-[10px] font-bold text-slate-400 italic uppercase tracking-wider">
+                    <div className="text-[10px] font-bold text-slate-500 italic uppercase tracking-wider">
                         {draft.tone}
                     </div>
                     <svg
-                        className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                        className={`w-4 h-4 text-slate-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -75,10 +75,10 @@ export default function DraftCard({ draft, defaultOpen = true }: Props) {
 
                 {/* Key Changes */}
                 <div className="space-y-3">
-                    <h4 className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Key Adjustments</h4>
+                    <h4 className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Key Adjustments</h4>
                     <div className="flex flex-wrap gap-2">
                         {draft.key_changes.map((change, i) => (
-                            <span key={i} className="px-2.5 py-1 bg-white/50 border border-white/30 text-slate-600 rounded-lg text-[10px] uppercase font-bold shadow-sm transition-colors hover:bg-white/80">
+                            <span key={i} className="px-2.5 py-1 bg-white/60 border border-white/40 text-slate-700 rounded-lg text-[10px] uppercase font-bold shadow-sm transition-colors hover:bg-white/90">
                                 {change}
                             </span>
                         ))}

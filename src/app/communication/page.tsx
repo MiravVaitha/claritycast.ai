@@ -324,8 +324,8 @@ export default function CommunicationPage() {
                     <textarea
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder="What do you want to say?"
-                        className="w-full h-56 p-5 bg-white/40 border border-white/20 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-600 focus:bg-white/60 outline-none transition-all resize-none text-base leading-relaxed text-slate-800 placeholder:text-slate-400"
+                        placeholder="Enter the raw message or thoughts you want to communicate..."
+                        className="w-full p-6 bg-white/50 border-2 border-white/60 rounded-3xl text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all min-h-[300px] font-medium leading-relaxed shadow-sm"
                     />
                 </div>
 
@@ -438,20 +438,20 @@ export default function CommunicationPage() {
                     </div>
 
                     {/* Refining Question Card */}
-                    <div className="p-6 glass-light !bg-indigo-600/10 !border-indigo-400/20 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="p-6 glass-light !bg-indigo-50/90 !border-indigo-400/30 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
-                            <div className="bg-indigo-600 text-white p-2 rounded-lg">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <h3 className="font-bold text-indigo-900 text-xs uppercase tracking-wider">Help me refine</h3>
+                            <div className="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-sm shadow-md shadow-indigo-500/20">✨</div>
+                            <h3 className="font-bold text-indigo-950 uppercase tracking-widest text-[10px]">Help me refine</h3>
                         </div>
-                        <p className="text-indigo-900 font-medium italic text-sm">&quot;{draftsData.refining_question}&quot;</p>
+                        <p className="text-sm font-bold text-indigo-900 leading-relaxed italic">
+                            &quot;{draftsData.refining_question}&quot;
+                        </p>
                         <div className="space-y-3">
                             <textarea
                                 value={refiningAnswer}
                                 onChange={(e) => setRefiningAnswer(e.target.value)}
-                                placeholder="Your answer..."
-                                className="w-full h-24 p-4 bg-white/50 border border-indigo-200/40 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none transition-all resize-none text-sm placeholder:text-indigo-400 text-slate-800"
+                                placeholder="Answer this question or add more context..."
+                                className="w-full p-4 bg-white/50 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-blue-400/60 min-h-[100px] text-blue-950 font-medium"
                             />
                             <button
                                 onClick={() => handleGenerate(true)}

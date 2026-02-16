@@ -362,20 +362,20 @@ export default function ClarityPage() {
                     <ClarityResults key={storedData?.requestHash} data={clarityData} />
 
                     {/* Refining Question Card */}
-                    <div className="p-6 glass-light !bg-blue-600/10 !border-blue-400/20 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="p-6 glass-light !bg-blue-50/90 !border-blue-400/30 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
-                            <div className="bg-blue-600 text-white p-2 rounded-lg">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
-                            </div>
-                            <h3 className="font-bold text-blue-900 text-xs uppercase tracking-wider">Want to go deeper?</h3>
+                            <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-sm shadow-md shadow-blue-500/20">🔍</div>
+                            <h3 className="font-bold text-blue-950 uppercase tracking-widest text-[10px]">Want to go deeper?</h3>
                         </div>
-                        <p className="text-blue-900 font-medium italic text-sm">&quot;{clarityData.one_sharp_question}&quot;</p>
+                        <p className="text-sm font-bold text-blue-900 leading-relaxed italic">
+                            &quot;{clarityData.one_sharp_question}&quot;
+                        </p>
                         <div className="space-y-3">
                             <textarea
                                 value={followupAnswer}
                                 onChange={(e) => setFollowupAnswer(e.target.value)}
-                                placeholder="Your answer..."
-                                className="w-full h-24 p-4 bg-white/50 border border-blue-200/40 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition-all resize-none text-sm placeholder:text-blue-400 text-slate-800"
+                                placeholder="Answer this question or add more context..."
+                                className="w-full p-4 bg-white/50 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-blue-300 min-h-[100px] text-blue-950 font-medium"
                             />
                             <button
                                 onClick={() => handleGenerate(true)}

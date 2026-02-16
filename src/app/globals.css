@@ -11,6 +11,10 @@
 
   --shadow-glass: 0 20px 60px rgba(0, 0, 0, 0.25);
   --shadow-glass-dark: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --shadow-luminous: 0 20px 80px rgba(0, 0, 0, 0.15);
+
+  --drop-shadow-heading: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --drop-shadow-body: 0 1px 2px rgba(0, 0, 0, 0.2);
 
   --animation-first: moveVertical 30s ease infinite;
   --animation-second: moveInCircle 20s reverse infinite;
@@ -96,24 +100,31 @@ body {
   }
 
   .glass-light {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-glass rounded-2xl;
+    @apply bg-white/75 backdrop-blur-2xl border border-white/40 shadow-glass rounded-2xl;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
   }
 
   .glass-dark {
-    @apply bg-slate-900/45 backdrop-blur-xl border border-white/10 shadow-glass-dark rounded-2xl text-white;
+    @apply bg-slate-900/60 backdrop-blur-2xl border border-white/20 shadow-glass-dark rounded-2xl text-white;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-luminous {
+    @apply bg-white/85 backdrop-blur-3xl border border-white/50 shadow-luminous rounded-3xl;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
   }
 
   /* Global Typography on Background */
   .text-on-bg-heading {
-    @apply text-white/90;
+    @apply text-white drop-shadow-heading;
   }
 
   .text-on-bg-body {
-    @apply text-white/70;
+    @apply text-white/90 drop-shadow-body;
   }
 
   .text-on-bg-muted {
-    @apply text-white/50;
+    @apply text-white/60;
   }
 
   /* Typography inside Light Glass */
@@ -121,11 +132,15 @@ body {
   .glass-light h2,
   .glass-light h3,
   .glass-light .heading {
-    @apply text-slate-900;
+    @apply text-slate-900 font-bold;
   }
 
   .glass-light p,
   .glass-light .body {
+    @apply text-slate-700 font-medium;
+  }
+
+  .glass-light .text-slate-500 {
     @apply text-slate-600;
   }
 }
