@@ -20,7 +20,7 @@ export default function Navbar() {
     return (
         <nav className="sticky top-0 z-50 px-4 py-4 md:px-8">
             <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16 glass-light !bg-white/35 !rounded-2xl !border-white/15 !shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-                <BrandLogo size="nav" />
+                <BrandLogo size="nav" variant="light" />
 
                 <div className="hidden md:flex items-center gap-8">
                     <Link href="/home" className={`text-sm font-bold transition-all hover:scale-105 ${pathname === '/home' ? 'text-slate-900' : 'text-slate-600/80 hover:text-slate-900'}`}>Home</Link>

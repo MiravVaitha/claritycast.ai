@@ -18,8 +18,8 @@ export default function Login() {
 
       <div className="w-full max-w-md glass-light p-10 relative z-10 border-white/40 backdrop-blur-3xl shadow-[0_40px_100px_rgba(0,0,0,0.3)]">
         <div className="text-center mb-10 flex flex-col items-center">
-          <div className="mb-6 transform hover:scale-105 transition-all duration-500 drop-shadow-2xl">
-            <BrandLogo size="auth" />
+          <div className="mb-6 transform hover:scale-105 transition-all duration-500">
+            <BrandLogo size="auth" variant="light" />
           </div>
           <p className="text-slate-600 font-bold uppercase tracking-widest text-[10px] opacity-70">Turn chaos into clear communication.</p>
         </div>

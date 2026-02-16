@@ -1,14 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
 interface BrandLogoProps {
     size?: "nav" | "auth" | "hero";
     showText?: boolean;
+    variant?: "light" | "dark";
 }
 
-export default function BrandLogo({ size = "nav", showText = true }: BrandLogoProps) {
+export default function BrandLogo({ size = "nav", showText = true, variant = "dark" }: BrandLogoProps) {
     // Sizing mapping
     const sizes = {
         nav: {
@@ -29,25 +29,31 @@ export default function BrandLogo({ size = "nav", showText = true }: BrandLogoPr
     };
 
     const current = sizes[size];
+    const isLight = variant === "light";
 
     return (
         <Link
             href="/home"
-            className={`flex items-center ${current.gap} group transition-transform active:scale-95 leading-none cursor-pointer`}
+            className={`flex items-center ${current.gap} group transition-transform active:scale-95 leading-none cursor-pointer bg-transparent hover:bg-transparent active:bg-transparent focus:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0 rounded-lg`}
         >
-            <div className="relative">
-                <Image
-                    src="/claritycast-logo.png"
-                    alt="ClarityCast Logo"
-                    width={current.img * 2} // Higher quality source
-                    height={current.img * 2}
-                    style={{ height: `${current.img}px`, width: 'auto' }}
-                    className="object-contain hover:opacity-90 transition-opacity"
-                    priority
-                />
-            </div>
+            {/* 
+                  variant="light": Inverted (White) | variant="dark": Standard (Dark)
+                */}
+            <img
+                src="/claritycast-logo.png"
+                alt="ClarityCast Logo"
+                style={{
+                    height: `${current.img}px`,
+                    width: 'auto',
+                    mixBlendMode: isLight ? 'screen' : 'multiply',
+                    filter: isLight
+                        ? 'invert(1) grayscale(1) brightness(2)'
+                        : 'brightness(1.2) contrast(1.2)'
+                }}
+                className="block hover:opacity-90 transition-opacity"
+            />
             {showText && (
-                <span className={`font-bold ${current.text} text-slate-600 tracking-tight leading-none h-fit`}>
+                <span className={`font-bold ${current.text} ${isLight ? 'text-white' : 'text-slate-900'} tracking-tight leading-none h-fit`}>
                     ClarityCast
                 </span>
             )}

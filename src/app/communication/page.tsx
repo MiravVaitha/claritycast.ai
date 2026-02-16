@@ -367,7 +367,7 @@ export default function CommunicationPage() {
                         </select>
                         <div className="flex items-center gap-4 px-4 bg-indigo-50/20 border border-indigo-200/30 rounded-xl">
                             {[
-                                { key: "preserveMeaning", label: "Meaning" },
+                                { key: "preserveMeaning", label: "Preserve meaning" },
                                 { key: "concise", label: "Concise" },
                                 { key: "formal", label: "Formal" },
                             ].map((opt) => (
@@ -431,6 +431,12 @@ export default function CommunicationPage() {
         <div className="space-y-6">
             {draftsData ? (
                 <>
+                    <div className="space-y-4">
+                        {draftsData.drafts.map((draft, idx) => (
+                            <DraftCard key={`${storedData?.requestHash}-${idx}`} draft={draft} defaultOpen={false} />
+                        ))}
+                    </div>
+
                     {/* Refining Question Card */}
                     <div className="p-6 glass-light !bg-indigo-600/10 !border-indigo-400/20 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
@@ -455,12 +461,6 @@ export default function CommunicationPage() {
                                 {isLoading ? "Refining..." : "Update Drafts"}
                             </button>
                         </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        {draftsData.drafts.map((draft, idx) => (
-                            <DraftCard key={idx} draft={draft} />
-                        ))}
                     </div>
                 </>
             ) : (

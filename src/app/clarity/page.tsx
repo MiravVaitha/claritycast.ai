@@ -359,7 +359,7 @@ export default function ClarityPage() {
         <div className="space-y-6">
             {clarityData ? (
                 <>
-                    <ClarityResults data={clarityData} />
+                    <ClarityResults key={storedData?.requestHash} data={clarityData} />
 
                     {/* Refining Question Card */}
                     <div className="p-6 glass-light !bg-blue-600/10 !border-blue-400/20 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">

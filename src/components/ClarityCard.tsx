@@ -42,6 +42,7 @@ export default function ClarityResults({ data }: Props) {
             <CollapsibleSection
                 title={isPrep ? "Purpose & Outcome" : "Core Issue"}
                 variant={isOverwhelm ? "amber" : "blue"}
+                defaultOpen={false}
                 icon={
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -63,6 +64,7 @@ export default function ClarityResults({ data }: Props) {
                 <CollapsibleSection
                     title="Priority: Do Today"
                     variant="amber"
+                    defaultOpen={false}
                     icon={
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -100,6 +102,7 @@ export default function ClarityResults({ data }: Props) {
                 <CollapsibleSection
                     title="Message Structure"
                     variant="purple"
+                    defaultOpen={false}
                     icon={
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
@@ -180,6 +183,7 @@ export default function ClarityResults({ data }: Props) {
                 <CollapsibleSection
                     title="Strategic Options"
                     variant="blue"
+                    defaultOpen={false}
                     icon={
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -208,6 +212,7 @@ export default function ClarityResults({ data }: Props) {
                 <CollapsibleSection
                     title={isPlan ? "Success Metrics" : "Decision Levers"}
                     variant="indigo"
+                    defaultOpen={false}
                     icon={
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -229,6 +234,7 @@ export default function ClarityResults({ data }: Props) {
                 <CollapsibleSection
                     title="Action Plan"
                     variant="rose"
+                    defaultOpen={false}
                     icon={
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -261,6 +267,7 @@ export default function ClarityResults({ data }: Props) {
                     <CollapsibleSection
                         title={isDecision ? "Small Experiment" : "Next Steps (14 Days)"}
                         variant="green"
+                        defaultOpen={false}
                         icon={
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -280,16 +287,6 @@ export default function ClarityResults({ data }: Props) {
                 )
             )}
 
-            {/* The Sharp Question */}
-            <div className="p-8 glass-dark !rounded-3xl shadow-2xl relative overflow-hidden group">
-                <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-white/5 blur-3xl rounded-full" />
-                <h3 className="font-bold text-white/40 mb-3 uppercase tracking-[0.2em] text-[10px]">
-                    {isOverwhelm ? "Reflection" : "The Sharp Question"}
-                </h3>
-                <p className="text-xl md:text-2xl font-medium leading-relaxed italic text-white/95">
-                    &quot;{sharp_question}&quot;
-                </p>
-            </div>
         </div>
     );
 }

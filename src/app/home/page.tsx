@@ -27,7 +27,7 @@ export default function Home() {
             {/* Hero Section */}
             <section className="py-20 px-8 text-center border-b border-slate-100 flex flex-col items-center">
                 <div className="mb-8 flex justify-center">
-                    <BrandLogo size="hero" />
+                    <BrandLogo size="hero" variant="light" />
                 </div>
                 <div className="max-w-4xl mx-auto space-y-6">
                     <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-on-bg-heading">
