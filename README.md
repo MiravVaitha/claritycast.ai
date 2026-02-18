@@ -1,57 +1,141 @@
-# ClarityCast
+# ClarityCast – AI Thinking & Communication Companion
 
-ClarityCast is a modern reflection and communication tool designed to help you turn chaotic thoughts into clear, actionable communication. Whether you're preparing a message for a recruiter, explaining a complex technical concept to a customer, or just dumping your brain to find clarity, ClarityCast has you covered.
+An AI-powered web application that helps users untangle complex thoughts and refine professional communication using structured reasoning and natural language generation.
 
-## Features
-
-- **Thought Dump**: A large, distraction-free area to capture your raw thoughts.
-- **Mode Selection**: Tailor the processing for Decisions, Plans, Brain dumps, or Message preparation.
-- **Clarity Cards**: AI-powered insights (mocked) that identify nuances and actionable goals from your input.
-- **Audience & Intent Tuning**: Customize your output for specific audiences (Recruiter, Engineer, Customer, Friend) and intents (Inform, Persuade, Explain, Apologise).
-- **Style Options**: Fine-tune the drafts with options for conciseness, formality, and meaning preservation.
-- **Draft Cards**: Ready-to-use communication drafts (mocked) tailored to your settings.
-
-## Tech Stack
-
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **State Management**: React `useState` (for this MVP)
-
-## Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18.17 or later)
-- npm (comes with Node.js)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd claritycast.ai
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the results.
-
-## Roadmap
-
-- [ ] Integration with real AI APIs (OpenAI / Anthropic).
-- [ ] User authentication and thought history.
-- [ ] Export to PDF and email.
-- [ ] Real-time collaboration.
+🌐 **Live site:** https://claritycast-ai.vercel.app  
+🤖 Powered by Gemini API  
+🎯 Built as an interactive AI product prototype
 
 ---
 
-*This is an MVP mock-up demonstrating the core UI/UX flow of ClarityCast.*
+## Features
+
+- 🧠 **Clarity Engine** — Transforms messy thoughts into structured clarity cards (decisions, plans, reframing, next steps)
+- ✍️ **Communication Engine** — Refines messages into clear, professional drafts
+- 🎨 **Animated Gradient UI** — Custom background animation with layered depth
+- 📱 **Responsive Design** — Optimized for desktop and mobile
+- 🧩 **Modular Architecture** — Reusable components with clean separation of concerns
+- 🔁 **Auto-Deploy via Vercel** — Continuous deployment from GitHub
+
+---
+
+## Tech Stack
+
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Gemini API
+- Vercel (Deployment)
+- Git & GitHub
+
+---
+
+## Getting Started
+
+### Installation
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/claritycast.ai.git
+cd claritycast.ai
+npm install
+```
+
+---
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+GEMINI_API_KEY=your_api_key_here
+GEMINI_MODEL=gemini-3-flash-preview
+```
+
+---
+
+### Run the development server
+
+```bash
+npm run dev
+```
+
+Then open:
+
+```
+http://localhost:3000
+```
+
+---
+
+## Build
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+Start production server locally:
+
+```bash
+npm start
+```
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/                    # Gemini server routes
+│   ├── layout.tsx              # Global layout & background mount
+│   └── (pages)                 # Home, Clarity, Communication
+├── components/
+│   ├── ui/                     # shadcn components
+│   └── shared components
+├── lib/
+│   └── geminiSafeGenerate.ts   # AI reliability wrapper
+├── styles/
+```
+
+---
+
+## Architecture Notes
+
+- Global animated background mounted once in layout (fixed, non-blocking)
+- Server-side Gemini calls for secure API usage
+- Retry + timeout handling for production stability
+- Structured JSON generation with safe parsing
+- Graceful fallback for demo resilience
+- Stateless design (no database required for demo version)
+
+---
+
+## Deployment
+
+This project is deployed using **Vercel**.
+
+Production builds are automatically deployed on every push to the `main` branch.
+
+---
+
+## 🚀 Roadmap
+
+ClarityCast is actively evolving. Upcoming improvements include:
+
+- Character-driven AI interaction (Think with Bear / Speak with Parrot)
+- Reduced user friction in communication controls
+- Enhanced structured output reliability
+- Performance optimizations
+
+Feedback and iteration are ongoing.
+
+---
+
+## License
+
+MIT License
