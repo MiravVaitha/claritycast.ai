@@ -2,7 +2,7 @@
 
 An AI-powered web application that helps users untangle complex thoughts and refine professional communication using structured reasoning and natural language generation.
 
-🌐 **Live site:** https://claritycast-ai.vercel.app  
+🌐 **Live site:** https://claritycast.vercel.app/login
 🤖 Powered by Gemini API  
 🎯 Built as an interactive AI product prototype
 
