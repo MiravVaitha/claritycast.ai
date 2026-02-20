@@ -71,6 +71,7 @@ export default function ClarityPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
+    const [retryStatus, setRetryStatus] = useState<{ attempt: number; maxRetries: number } | null>(null);
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
     const [isClient, setIsClient] = useState(false);
@@ -151,6 +152,7 @@ export default function ClarityPage() {
         setIsLoading(true);
         setError(null);
         setRateLimitInfo(null);
+        setRetryStatus(null);
 
         try {
             if (!isRefining) {
@@ -165,7 +167,9 @@ export default function ClarityPage() {
                 }
             }
 
-            const data = await apiClient<ClarifyOutput>("/api/clarify", request);
+            const data = await apiClient<ClarifyOutput>("/api/clarify", request, {
+                onRetry: (attempt, maxRetries) => setRetryStatus({ attempt, maxRetries })
+            });
             const currentHash = await computeBaseHash(inputText, mode);
             setStoredData({ requestHash: currentHash, result: data });
             setClarityData(data);
@@ -328,7 +332,9 @@ export default function ClarityPage() {
                     {isLoading ? (
                         <>
                             <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                            Processing...
+                            {retryStatus
+                                ? `Service busy — retrying (${retryStatus.attempt} of ${retryStatus.maxRetries})...`
+                                : "Generating..."}
                         </>
                     ) : rateLimitInfo ? (
                         `Cooldown: ${rateLimitInfo.countdown}s`
@@ -336,6 +342,16 @@ export default function ClarityPage() {
                         clarityData ? "Regenerate Clarity" : "Generate Clarity"
                     )}
                 </button>
+
+                {error && !isLoading && !rateLimitInfo && (
+                    <button
+                        onClick={() => handleGenerate(false)}
+                        className="w-full py-2 text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 transition-colors"
+                    >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        Try Again
+                    </button>
+                )}
                 {clarityData && (
                     <button onClick={() => setIsResetModalOpen(true)} className="w-full py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors">
                         Reset Session

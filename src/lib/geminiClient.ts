@@ -107,17 +107,35 @@ export async function generateStructuredData<T>(
 ): Promise<T> {
     const ai = getGenAI();
     const model = MODEL_NAME;
+    const maxAttempts = 3;
+    let attempts = 0;
 
-    try {
-        const result = await executeGeneration(ai, model, userPrompt, systemPrompt, responseSchema);
-        return validateAndParse(result, schema, schemaName);
-    } catch (error: any) {
-        if (DEBUG_AI) {
-            console.error(`\n[DEBUG_AI] Generation failed for ${schemaName}`);
-            console.error(`Error: ${error.message}`);
+    while (attempts < maxAttempts) {
+        attempts++;
+        try {
+            const result = await executeGeneration(ai, model, userPrompt, systemPrompt, responseSchema);
+            return validateAndParse(result, schema, schemaName);
+        } catch (error: any) {
+            const isRetryable = isRateLimitError(error) ||
+                error.message?.includes("timed out") ||
+                error.message?.includes("503") ||
+                error.message?.includes("504");
+
+            if (isRetryable && attempts < maxAttempts) {
+                const delayMs = 2000 * attempts; // Simple backoff for server-side
+                console.warn(`[AI RETRY] ${schemaName} failed (attempt ${attempts}/${maxAttempts}). Retrying in ${delayMs}ms... Error: ${error.message}`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                continue;
+            }
+
+            if (DEBUG_AI) {
+                console.error(`\n[DEBUG_AI] Generation failed for ${schemaName} after ${attempts} attempts`);
+                console.error(`Error: ${error.message}`);
+            }
+            throw error;
         }
-        throw error;
     }
+    throw new Error(`Failed to generate ${schemaName} after ${maxAttempts} attempts`);
 }
 
 function validateAndParse<T>(json: any, schema: z.ZodType<T>, schemaName: string): T {
