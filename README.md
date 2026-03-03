@@ -51,8 +51,21 @@ Create a `.env.local` file in the root directory:
 
 ```env
 GEMINI_API_KEY=your_api_key_here
-GEMINI_MODEL=gemini-3-flash-preview
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_FALLBACK_MODEL=gemini-2.0-flash-lite
+DEBUG_AI=false
 ```
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `GEMINI_API_KEY` | Yes | — | Your Google Gemini API key |
+| `GEMINI_MODEL` | No | `gemini-2.5-flash` | Primary model for AI generation |
+| `GEMINI_FALLBACK_MODEL` | No | `gemini-2.0-flash-lite` | Fallback model if primary is slow or unavailable |
+| `DEBUG_AI` | No | `false` | Logs prompts, responses, and errors to the server console |
+
+Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com).
+
+> **Note:** `.env.local` is gitignored and must never be committed. Set these variables in Vercel under **Settings → Environment Variables** for production.
 
 ---
 
@@ -91,15 +104,23 @@ npm start
 ```
 src/
 ├── app/
-│   ├── api/                    # Gemini server routes
-│   ├── layout.tsx              # Global layout & background mount
-│   └── (pages)                 # Home, Clarity, Communication
-├── components/
-│   ├── ui/                     # shadcn components
-│   └── shared components
-├── lib/
-│   └── geminiSafeGenerate.ts   # AI reliability wrapper
-├── styles/
+│   ├── api/
+│   │   ├── clarify/            # POST /api/clarify
+│   │   └── communicate/        # POST /api/communicate
+│   ├── (auth)/login/           # Login page
+│   ├── (app)/
+│   │   ├── home/               # Home / landing
+│   │   ├── clarity/            # Clarify feature
+│   │   └── communication/      # Communicate feature
+│   └── layout.tsx              # Global layout & background mount
+└── lib/
+    ├── geminiClient.ts         # AI calls, model fallback, timeout logic
+    ├── api-client.ts           # Browser-side fetch wrapper with retries
+    ├── prompts.ts              # System prompts and user prompt builders
+    ├── schemas.ts              # Zod schemas for all inputs and outputs
+    ├── aiCache.ts              # Client-side response caching
+    ├── types.ts                # Shared TypeScript types
+    └── utils.ts                # Utility functions
 ```
 
 ---
@@ -108,10 +129,22 @@ src/
 
 - Global animated background mounted once in layout (fixed, non-blocking)
 - Server-side Gemini calls for secure API usage
-- Retry + timeout handling for production stability
-- Structured JSON generation with safe parsing
-- Graceful fallback for demo resilience
 - Stateless design (no database required for demo version)
+- Structured JSON generation with Zod schema validation and safe parsing
+
+### AI Reliability (two-layer strategy)
+
+**Server layer** (`src/lib/geminiClient.ts`):
+- Primary model: `gemini-2.5-flash` — best stable flash model
+- Fallback model: `gemini-2.0-flash-lite` — lightweight, stable
+- 20s timeout per attempt
+- Try primary once → if retryable error (timeout / 503 / 504 / rate limit), wait 1s → try fallback once → if both fail, return error to client
+
+**Browser layer** (`src/lib/api-client.ts`):
+- 60s timeout per HTTP request
+- Up to 3 retries on HTTP 429, 408, 500–504 or network errors
+- Exponential backoff with ±50% jitter, respects `Retry-After` headers
+- The "retrying 1 of 3…" message in the UI comes from this layer — it means both Gemini models were unavailable and the browser is resending the full request
 
 ---
 
