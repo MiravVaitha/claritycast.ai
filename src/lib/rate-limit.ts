@@ -6,17 +6,26 @@ interface RateLimitEntry {
     resetTime: number;
 }
 
-const store = new Map<string, RateLimitEntry>();
+// Use globalThis to persist across hot reloads (dev) and warm invocations (serverless)
+const globalStore = globalThis as typeof globalThis & { __rateLimitStore?: Map<string, RateLimitEntry> };
+if (!globalStore.__rateLimitStore) {
+    globalStore.__rateLimitStore = new Map<string, RateLimitEntry>();
+}
+const store = globalStore.__rateLimitStore;
 
 // Clean up expired entries every 5 minutes
-setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of store) {
-        if (now >= entry.resetTime) {
-            store.delete(key);
+const globalCleanup = globalThis as typeof globalThis & { __rateLimitCleanup?: boolean };
+if (!globalCleanup.__rateLimitCleanup) {
+    globalCleanup.__rateLimitCleanup = true;
+    setInterval(() => {
+        const now = Date.now();
+        for (const [key, entry] of store) {
+            if (now >= entry.resetTime) {
+                store.delete(key);
+            }
         }
-    }
-}, 5 * 60 * 1000);
+    }, 5 * 60 * 1000);
+}
 
 export function rateLimit(ip: string): { allowed: boolean; remaining: number; retryAfterSeconds: number } {
     const now = Date.now();
