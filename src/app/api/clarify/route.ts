@@ -11,6 +11,7 @@ import {
     CLARIFY_SYSTEM_PROMPT,
 } from "@/lib/prompts";
 import { ClarityMode } from "@/lib/schemas";
+import { rateLimit } from "@/lib/rate-limit";
 
 const DEBUG_AI = process.env.DEBUG_AI === "true";
 
@@ -96,6 +97,16 @@ const CLARITY_GEMINI_SCHEMAS: Record<string, any> = {
 };
 
 export async function POST(req: Request) {
+    // Rate limit by IP
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const { allowed, retryAfterSeconds } = rateLimit(ip);
+    if (!allowed) {
+        return NextResponse.json(
+            { errorType: "RATE_LIMIT", message: "Too many requests. Please wait before trying again.", retryAfterSeconds },
+            { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } }
+        );
+    }
+
     try {
         let body: any;
 
