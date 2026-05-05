@@ -2,9 +2,12 @@
 
 An AI-powered web application that helps users untangle complex thoughts and refine professional communication using structured reasoning and natural language generation.
 
-🌐 **Live site:** https://claritycast.vercel.app/login
+🌐 **Legacy Demo Site:** https://claritycast.vercel.app/login
 🤖 Powered by Gemini API  
 🎯 Built as an interactive AI product prototype
+
+Updated full version in clarityv2 repository
+**Full Version Site:** https://clarityv2-cyan.vercel.app/
 
 ---
 
@@ -166,6 +169,8 @@ ClarityCast is actively evolving. Upcoming improvements include:
 - Performance optimizations
 
 Feedback and iteration are ongoing.
+
+**Updated:** All roadmap changes implemented into full version of ClarityCast in clarityv2 repository.
 
 ---
 
