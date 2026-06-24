@@ -6,7 +6,7 @@ An AI-powered web application that helps users untangle complex thoughts and ref
 🤖 Powered by Gemini API  
 🎯 Built as an interactive AI product prototype
 
-Updated full version in clarityv2 repository.
+Updated full version in ClarityCast.ai repository.
 **Full Version Site:** https://clarityv2-cyan.vercel.app/
 
 ---
@@ -170,7 +170,7 @@ ClarityCast is actively evolving. Upcoming improvements include:
 
 Feedback and iteration are ongoing.
 
-**Updated:** All roadmap changes implemented into full version of ClarityCast in clarityv2 repository.
+**Updated:** All roadmap changes implemented into full version of ClarityCast in ClarityCast.ai repository.
 
 ---
 
