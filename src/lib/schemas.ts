@@ -3,22 +3,32 @@ import { z } from "zod";
 export const ClarityModeSchema = z.enum(["decision", "plan", "overwhelm", "message_prep"]);
 export type ClarityMode = z.infer<typeof ClarityModeSchema>;
 
+// Length caps bound the per-request token cost so a single call
+// can't be a massive prompt. 8000 chars ≈ ~2000 tokens.
+const MAX_PROMPT = 8000;
+const MAX_ANSWER = 2000;
+const MAX_EXTRA = 4000;
+
 export const ClarifyInputSchema = z.object({
     mode: ClarityModeSchema,
-    text: z.string().min(1, "Input text is required"),
-    followup_answer: z.string().optional(),
+    text: z.string().min(1, "Input text is required").max(MAX_PROMPT),
+    followup_answer: z.string().max(MAX_EXTRA).optional(),
 });
 
 export const ClarifyRefineInputSchema = z.object({
     mode: ClarityModeSchema,
-    text: z.string().min(1),
-    refining_answers: z.tuple([z.string(), z.string(), z.string()]),
-    extra_context: z.string().optional(),
+    text: z.string().min(1).max(MAX_PROMPT),
+    refining_answers: z.tuple([
+        z.string().max(MAX_ANSWER),
+        z.string().max(MAX_ANSWER),
+        z.string().max(MAX_ANSWER),
+    ]),
+    extra_context: z.string().max(MAX_EXTRA).optional(),
     prior_output: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const CommunicateRefineInputSchema = z.object({
-    message: z.string().min(1),
+    message: z.string().min(1).max(MAX_PROMPT),
     contexts: z.array(z.enum(["evaluative", "technical", "persuasive", "personal"])),
     intent: z.enum(["inform", "persuade", "explain", "apologise"]),
     options: z.object({
@@ -26,8 +36,12 @@ export const CommunicateRefineInputSchema = z.object({
         concise: z.boolean(),
         formal: z.boolean(),
     }),
-    refining_answers: z.tuple([z.string(), z.string(), z.string()]),
-    extra_context: z.string().optional(),
+    refining_answers: z.tuple([
+        z.string().max(MAX_ANSWER),
+        z.string().max(MAX_ANSWER),
+        z.string().max(MAX_ANSWER),
+    ]),
+    extra_context: z.string().max(MAX_EXTRA).optional(),
 });
 
 // --- Mode Specific Output Schemas ---
@@ -120,7 +134,7 @@ export const ClarifyOutputSchema = z.object({
 });
 
 export const CommunicateInputSchema = z.object({
-    message: z.string().min(1),
+    message: z.string().min(1).max(MAX_PROMPT),
     contexts: z.array(z.enum(["evaluative", "technical", "persuasive", "personal"])),
     intent: z.enum(["inform", "persuade", "explain", "apologise"]),
     options: z.object({
@@ -128,7 +142,7 @@ export const CommunicateInputSchema = z.object({
         concise: z.boolean(),
         formal: z.boolean(),
     }),
-    refiningAnswer: z.string().optional(),
+    refiningAnswer: z.string().max(MAX_EXTRA).optional(),
 });
 
 export const CommunicateOutputSchema = z.object({

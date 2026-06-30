@@ -11,6 +11,7 @@ import {
     COMMUNICATE_SYSTEM_PROMPT,
 } from "@/lib/prompts";
 import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp, validateRequestSecurity } from "@/lib/security";
 
 const DEBUG_AI = process.env.DEBUG_AI === "true";
 
@@ -38,8 +39,10 @@ const COMM_GEMINI_SCHEMA = {
 };
 
 export async function POST(req: Request) {
-    // Rate limit by IP
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const securityFail = validateRequestSecurity(req);
+    if (securityFail) return securityFail;
+
+    const ip = getClientIp(req);
     const { allowed, retryAfterSeconds } = rateLimit(ip);
     if (!allowed) {
         return NextResponse.json(

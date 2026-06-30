@@ -1,3 +1,8 @@
+// NOTE: This in-memory limiter is per-instance. On Vercel each cold lambda
+// starts the counter from zero, so under high concurrency the effective
+// limit is (MAX_REQUESTS x number_of_warm_instances). Acceptable for low
+// traffic + a Gemini-side quota cap. For production scale, swap this file
+// to Upstash Redis (`@upstash/ratelimit`) — same `rateLimit(ip)` signature.
 const WINDOW_MS = (parseInt(process.env.RATE_LIMIT_WINDOW_S || "60", 10)) * 1000;
 const MAX_REQUESTS = parseInt(process.env.RATE_LIMIT_MAX || "10", 10);
 

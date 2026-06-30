@@ -12,6 +12,7 @@ import {
 } from "@/lib/prompts";
 import { ClarityMode } from "@/lib/schemas";
 import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp, validateRequestSecurity } from "@/lib/security";
 
 const DEBUG_AI = process.env.DEBUG_AI === "true";
 
@@ -97,8 +98,10 @@ const CLARITY_GEMINI_SCHEMAS: Record<string, any> = {
 };
 
 export async function POST(req: Request) {
-    // Rate limit by IP
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const securityFail = validateRequestSecurity(req);
+    if (securityFail) return securityFail;
+
+    const ip = getClientIp(req);
     const { allowed, retryAfterSeconds } = rateLimit(ip);
     if (!allowed) {
         return NextResponse.json(
